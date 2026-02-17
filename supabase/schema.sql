@@ -96,6 +96,28 @@ create table if not exists public.tool_updates (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.tool_guides (
+  id uuid primary key default gen_random_uuid(),
+  tool_id uuid not null unique references public.tools(id) on delete cascade,
+  summary text not null,
+  free_access_notes text,
+  requires_login boolean not null default false,
+  requires_api_key boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.tool_guide_steps (
+  id uuid primary key default gen_random_uuid(),
+  guide_id uuid not null references public.tool_guides(id) on delete cascade,
+  step_order integer not null check (step_order > 0),
+  title text not null,
+  description text not null,
+  image_url text,
+  created_at timestamptz not null default now(),
+  unique (guide_id, step_order)
+);
+
 create index if not exists idx_tools_status_created_at on public.tools(status, created_at desc);
 create index if not exists idx_tools_category on public.tools(category);
 create index if not exists idx_tools_free_type on public.tools(free_type);
@@ -103,6 +125,8 @@ create index if not exists idx_tool_reviews_tool on public.tool_reviews(tool_id)
 create index if not exists idx_tool_reviews_user on public.tool_reviews(user_id);
 create index if not exists idx_tool_bookmarks_user on public.tool_bookmarks(user_id);
 create index if not exists idx_tool_submissions_status on public.tool_submissions(status, created_at);
+create index if not exists idx_tool_guides_tool_id on public.tool_guides(tool_id);
+create index if not exists idx_tool_guide_steps_guide_order on public.tool_guide_steps(guide_id, step_order);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -332,6 +356,10 @@ security definer
 set search_path = public
 as $$
 begin
+  if auth.role() <> 'service_role' and session_user not in ('postgres', 'supabase_admin') then
+    raise exception 'Only service_role can call set_admin_by_email';
+  end if;
+
   update public.profiles
   set role = 'admin', updated_at = now()
   where lower(email) = lower(target_email);
@@ -351,6 +379,11 @@ for each row execute function public.set_updated_at();
 drop trigger if exists trg_tool_reviews_updated_at on public.tool_reviews;
 create trigger trg_tool_reviews_updated_at
 before update on public.tool_reviews
+for each row execute function public.set_updated_at();
+
+drop trigger if exists trg_tool_guides_updated_at on public.tool_guides;
+create trigger trg_tool_guides_updated_at
+before update on public.tool_guides
 for each row execute function public.set_updated_at();
 
 drop trigger if exists trg_on_auth_user_created on auth.users;
@@ -375,6 +408,8 @@ alter table public.tool_bookmarks enable row level security;
 alter table public.tool_submissions enable row level security;
 alter table public.platform_resources enable row level security;
 alter table public.tool_updates enable row level security;
+alter table public.tool_guides enable row level security;
+alter table public.tool_guide_steps enable row level security;
 
 drop policy if exists "Profiles public read" on public.profiles;
 create policy "Profiles public read"
@@ -532,6 +567,94 @@ create policy "Tool updates public read"
 on public.tool_updates
 for select
 using (true);
+
+drop policy if exists "Tool guides public read" on public.tool_guides;
+create policy "Tool guides public read"
+on public.tool_guides
+for select
+using (true);
+
+drop policy if exists "Tool guides admin manage" on public.tool_guides;
+create policy "Tool guides admin manage"
+on public.tool_guides
+for all
+to authenticated
+using (public.is_admin(auth.uid()))
+with check (public.is_admin(auth.uid()));
+
+drop policy if exists "Tool guide steps public read" on public.tool_guide_steps;
+create policy "Tool guide steps public read"
+on public.tool_guide_steps
+for select
+using (true);
+
+drop policy if exists "Tool guide steps admin manage" on public.tool_guide_steps;
+create policy "Tool guide steps admin manage"
+on public.tool_guide_steps
+for all
+to authenticated
+using (public.is_admin(auth.uid()))
+with check (public.is_admin(auth.uid()));
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'avatars',
+  'avatars',
+  true,
+  2097152,
+  array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "Avatar images are publicly readable" on storage.objects;
+create policy "Avatar images are publicly readable"
+on storage.objects
+for select
+using (bucket_id = 'avatars');
+
+drop policy if exists "Avatar upload in own folder" on storage.objects;
+create policy "Avatar upload in own folder"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "Avatar update own folder files" on storage.objects;
+create policy "Avatar update own folder files"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "Avatar delete own folder files" on storage.objects;
+create policy "Avatar delete own folder files"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+revoke select on table public.profiles from anon, authenticated;
+grant select (id, full_name, avatar_url, bio, role, created_at, updated_at) on table public.profiles to anon, authenticated;
+
+revoke execute on function public.set_admin_by_email(text) from public, anon, authenticated;
+grant execute on function public.set_admin_by_email(text) to service_role;
 
 grant execute on function public.is_admin(uuid) to anon, authenticated;
 grant execute on function public.increment_tool_click(uuid) to anon, authenticated;

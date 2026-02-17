@@ -51,8 +51,8 @@ export default function RegisterPage() {
 
   return (
     <div className="mx-auto w-full max-w-md px-4 py-10 md:px-6">
-      <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-6">
-        <h1 className="text-2xl font-black text-[var(--color-ink)]">Create Account</h1>
+      <section className="premium-panel rounded-2xl p-6">
+        <h1 className="section-title text-2xl font-black">Create Account</h1>
         <p className="mt-1 text-sm text-[var(--color-muted)]">Join and start saving/reviewing tools.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">

@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${spaceGrotesk.variable} ${jetBrainsMono.variable}`}>
-        <div className="min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)]">
+        <div className="page-shell min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)]">
           <SiteHeader />
           <main className="min-h-[calc(100vh-150px)]">{children}</main>
           <SiteFooter />

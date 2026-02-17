@@ -5,9 +5,7 @@ import { useEffect, useState } from "react";
 const STORAGE_KEY = "sth-ui-theme";
 const THEMES = [
   { value: "forest", label: "Forest" },
-  { value: "slate", label: "Slate" },
-  { value: "sand", label: "Sand" },
-  { value: "midnight", label: "Dark" },
+  { value: "dark", label: "Dark" },
 ] as const;
 
 type ThemeValue = (typeof THEMES)[number]["value"];
@@ -17,9 +15,12 @@ function getInitialTheme(): ThemeValue {
     return "forest";
   }
 
-  const saved = window.localStorage.getItem(STORAGE_KEY) as ThemeValue | null;
-  const isValid = saved && THEMES.some((item) => item.value === saved);
-  return isValid && saved ? saved : "forest";
+  const saved = window.localStorage.getItem(STORAGE_KEY);
+  if (saved === "midnight") {
+    return "dark";
+  }
+  const isValid = THEMES.some((item) => item.value === saved);
+  return isValid ? (saved as ThemeValue) : "forest";
 }
 
 export function ThemeSwitcher() {

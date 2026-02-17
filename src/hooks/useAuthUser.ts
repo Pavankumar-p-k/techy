@@ -6,7 +6,10 @@ import type { User } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/types";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type Profile = Pick<
+  Database["public"]["Tables"]["profiles"]["Row"],
+  "id" | "full_name" | "avatar_url" | "bio" | "role" | "created_at" | "updated_at"
+>;
 
 export function useAuthUser() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
@@ -33,7 +36,7 @@ export function useAuthUser() {
 
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, full_name, avatar_url, bio, role, created_at, updated_at")
       .eq("id", currentUser.id)
       .single();
 

@@ -1,15 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { TOOL_CATEGORIES, FREE_TYPE_LABELS } from "@/lib/constants";
-import type { FreeType } from "@/lib/types";
+import type { Database, FreeType } from "@/lib/types";
+import { normalizeUrl, parseTagsInput, slugCandidateFromName, toolSubmissionInputSchema } from "@/lib/validation";
 
 const FREE_TYPES: FreeType[] = ["free_forever", "freemium", "trial", "open_source", "student_plan"];
+type ExistingTool = Pick<Database["public"]["Tables"]["tools"]["Row"], "name" | "slug" | "status" | "url">;
+type ExistingSubmission = Pick<Database["public"]["Tables"]["tool_submissions"]["Row"], "name" | "status" | "url">;
 
 export function SubmitToolClient() {
-  const router = useRouter();
   const { supabase, user, loading } = useAuthUser();
 
   const [name, setName] = useState("");
@@ -23,12 +25,6 @@ export function SubmitToolClient() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login?next=/submit");
-    }
-  }, [loading, router, user]);
-
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!user) {
@@ -38,22 +34,94 @@ export function SubmitToolClient() {
     setSubmitting(true);
     setMessage(null);
 
-    const tags = tagsInput
-      .split(",")
-      .map((tag) => tag.trim().toLowerCase())
-      .filter(Boolean)
-      .slice(0, 8);
+    const parsedTags = parseTagsInput(tagsInput);
+    const validation = toolSubmissionInputSchema.safeParse({
+      name,
+      url,
+      category,
+      shortDescription,
+      howItWorks,
+      freeType,
+      freeDetails,
+      tags: parsedTags,
+    });
+
+    if (!validation.success) {
+      setMessage(validation.error.issues[0]?.message ?? "Please check your input and try again.");
+      setSubmitting(false);
+      return;
+    }
+
+    const normalizedIncomingUrl = normalizeUrl(validation.data.url);
+    const incomingSlug = slugCandidateFromName(validation.data.name);
+
+    const [toolsRes, ownSubmissionsRes] = await Promise.all([
+      supabase.from("tools").select("name,slug,url,status").in("status", ["published", "pending", "draft"]).limit(500),
+      supabase
+        .from("tool_submissions")
+        .select("name,url,status")
+        .eq("submitted_by", user.id)
+        .in("status", ["pending", "approved"])
+        .limit(200),
+    ]);
+
+    if (toolsRes.error || ownSubmissionsRes.error) {
+      setMessage(toolsRes.error?.message ?? ownSubmissionsRes.error?.message ?? "Failed to validate duplicates.");
+      setSubmitting(false);
+      return;
+    }
+
+    const existingTools = (toolsRes.data ?? []) as ExistingTool[];
+    const ownSubmissions = (ownSubmissionsRes.data ?? []) as ExistingSubmission[];
+
+    const duplicateToolByUrl = normalizedIncomingUrl
+      ? existingTools.find((item) => {
+          const normalized = normalizeUrl(item.url);
+          return normalized && normalized === normalizedIncomingUrl;
+        })
+      : null;
+
+    const duplicateToolBySlug = existingTools.find((item) => item.slug === incomingSlug);
+
+    const ownSubmissionByUrl = normalizedIncomingUrl
+      ? ownSubmissions.find((item) => {
+          const normalized = normalizeUrl(item.url);
+          return normalized && normalized === normalizedIncomingUrl;
+        })
+      : null;
+
+    const ownSubmissionBySlug = ownSubmissions.find((item) => slugCandidateFromName(item.name) === incomingSlug);
+
+    const duplicateTool = duplicateToolByUrl ?? duplicateToolBySlug;
+    const duplicateSubmission = ownSubmissionByUrl ?? ownSubmissionBySlug;
+
+    if (duplicateTool) {
+      const duplicateReason = duplicateToolByUrl ? "A tool with this website is already listed" : "A tool with a very similar name already exists";
+      const followUp =
+        duplicateTool.status === "published"
+          ? `Open it here: /tools/${duplicateTool.slug}`
+          : "It already exists in the moderation pipeline.";
+      setMessage(`${duplicateReason}: "${duplicateTool.name}". ${followUp}`);
+      setSubmitting(false);
+      return;
+    }
+
+    if (duplicateSubmission) {
+      setMessage(`You already submitted "${duplicateSubmission.name}" (${duplicateSubmission.status}). Edit or wait for review.`);
+      setSubmitting(false);
+      return;
+    }
 
     const { error } = await supabase.from("tool_submissions").insert({
       submitted_by: user.id,
-      name: name.trim(),
-      url: url.trim(),
-      category,
-      short_description: shortDescription.trim(),
-      how_it_works: howItWorks.trim(),
-      free_type: freeType,
-      free_details: freeDetails.trim(),
-      tags,
+      name: validation.data.name,
+      url: validation.data.url,
+      category: validation.data.category,
+      short_description: validation.data.shortDescription,
+      how_it_works: validation.data.howItWorks,
+      free_type: validation.data.freeType,
+      free_details: validation.data.freeDetails,
+      tags: validation.data.tags,
     });
 
     if (error) {
@@ -71,14 +139,33 @@ export function SubmitToolClient() {
     setSubmitting(false);
   }
 
-  if (loading || !user) {
+  if (loading) {
     return <p className="mx-auto w-full max-w-3xl px-4 py-10 text-sm text-[var(--color-muted)] md:px-6">Loading...</p>;
+  }
+
+  if (!user) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-10 md:px-6">
+        <section className="premium-panel rounded-2xl p-6">
+          <h1 className="section-title text-2xl font-black">Login Required</h1>
+          <p className="mt-2 text-sm text-[var(--color-muted)]">You need an account to submit tools.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/login?next=/submit" className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-[var(--color-paper)]">
+              Login
+            </Link>
+            <Link href="/register" className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)]">
+              Create Account
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
   }
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6 md:py-10">
-      <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-6">
-        <h1 className="text-2xl font-black text-[var(--color-ink)]">Submit a New Tool</h1>
+      <section className="premium-panel rounded-2xl p-6">
+        <h1 className="section-title text-2xl font-black">Submit a New Tool</h1>
         <p className="mt-1 text-sm text-[var(--color-muted)]">Help other students discover useful free platforms.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4">

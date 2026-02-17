@@ -256,6 +256,69 @@ export interface Database {
         };
         Relationships: [];
       };
+      tool_guides: {
+        Row: {
+          id: string;
+          tool_id: string;
+          summary: string;
+          free_access_notes: string | null;
+          requires_login: boolean;
+          requires_api_key: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tool_id: string;
+          summary: string;
+          free_access_notes?: string | null;
+          requires_login?: boolean;
+          requires_api_key?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tool_id?: string;
+          summary?: string;
+          free_access_notes?: string | null;
+          requires_login?: boolean;
+          requires_api_key?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      tool_guide_steps: {
+        Row: {
+          id: string;
+          guide_id: string;
+          step_order: number;
+          title: string;
+          description: string;
+          image_url: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          guide_id: string;
+          step_order: number;
+          title: string;
+          description: string;
+          image_url?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          guide_id?: string;
+          step_order?: number;
+          title?: string;
+          description?: string;
+          image_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       tool_updates: {
         Row: {
           id: string;

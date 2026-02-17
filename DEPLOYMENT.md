@@ -25,6 +25,29 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 REVALIDATE_SECRET=your-long-random-secret
 ```
 
+### Windows one-command setup (local env + Vercel env + redeploy)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-vercel-supabase.ps1 `
+  -SupabaseUrl "https://YOUR-PROJECT-REF.supabase.co" `
+  -SupabaseAnonKey "YOUR_SUPABASE_ANON_KEY" `
+  -SupabaseServiceRoleKey "YOUR_SUPABASE_SERVICE_ROLE_KEY" `
+  -AdminEmail "your-email@example.com" `
+  -ProductionSiteUrl "https://your-project.vercel.app"
+```
+
+This script:
+- writes `.env.local`
+- sets Vercel env vars for `production`, `preview`, and `development`
+- tries to promote `-AdminEmail` to admin via `set_admin_by_email`
+- triggers a fresh production deployment
+
+If you want to skip admin promotion call:
+
+```powershell
+... -SkipAdminPromotion
+```
+
 ## 3) Make yourself admin
 
 1. Register account at `/register`.

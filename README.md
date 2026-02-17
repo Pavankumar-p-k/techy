@@ -5,7 +5,11 @@ Student Tool Hub is a lightweight web platform for students to discover useful f
 It includes:
 - User signup/login with Supabase Auth
 - Public tool feed with search and filters
+- Top search + side panel categories/bookmarks layout
+- Tool logo/image cards with polished animations
 - Tool detail pages with ratings and reviews
+- Tool-page sharing for mobile apps (WhatsApp/Telegram/X/copy link)
+- Optional step-by-step setup guides with images for tools needing login/API setup
 - Bookmarking
 - User tool submissions
 - Admin moderation panel to approve/reject submissions
@@ -56,15 +60,33 @@ Open: `http://localhost:3000`
 1. Create a new Supabase project.
 2. Open SQL Editor.
 3. Run `supabase/schema.sql`.
-4. Run `supabase/seed.sql`.
-5. Create your first account from the app (`/register`).
-6. In SQL Editor, run:
+4. Run `supabase/migrations/20260213_security_hardening.sql`.
+5. Run `supabase/migrations/20260217_tool_guides_and_realtime.sql`.
+6. Run `supabase/migrations/20260217_storage_avatars.sql`.
+7. Run `supabase/seed.sql`.
+8. Create your first account from the app (`/register`).
+9. In SQL Editor, run:
 
 ```sql
 select public.set_admin_by_email('your-email@example.com');
 ```
 
 Now your account can open `/admin` and moderate submissions.
+
+### Profile photo bucket commands
+
+If you want to apply manually in SQL editor (instead of migration), run:
+
+```sql
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('avatars', 'avatars', true, 2097152, array['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+on conflict (id) do update
+set public = excluded.public,
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
+```
+
+Then apply these policies from `supabase/migrations/20260217_storage_avatars.sql`.
 
 ## Data Flow
 
@@ -77,6 +99,7 @@ Now your account can open `/admin` and moderate submissions.
 ## Database Files
 
 - `supabase/schema.sql` - tables, triggers, functions, RLS policies
+- `supabase/migrations/20260217_tool_guides_and_realtime.sql` - setup-guide tables + realtime publication wiring
 - `supabase/seed.sql` - initial tools and student resources
 
 ## Deploy on Vercel
@@ -97,6 +120,21 @@ vercel --prod
 ```
 
 When prompted, login in browser and complete project linking.
+
+### Windows automation (optional)
+
+If you are on Windows and want a one-command setup for local + Vercel env vars:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-vercel-supabase.ps1 `
+  -SupabaseUrl "https://YOUR-PROJECT-REF.supabase.co" `
+  -SupabaseAnonKey "YOUR_SUPABASE_ANON_KEY" `
+  -SupabaseServiceRoleKey "YOUR_SUPABASE_SERVICE_ROLE_KEY" `
+  -AdminEmail "you@example.com" `
+  -ProductionSiteUrl "https://your-project.vercel.app"
+```
+
+Add `-SkipAdminPromotion` if you do not want the script to call `set_admin_by_email`.
 
 ## Build Check
 
