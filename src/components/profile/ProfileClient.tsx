@@ -29,6 +29,7 @@ interface BookmarkItem {
 export function ProfileClient() {
   const router = useRouter();
   const { supabase, user, profile, loading, refresh } = useAuthUser();
+  const isAdmin = profile?.role === "admin";
 
   const [activePanel, setActivePanel] = useState<ProfilePanel>("profile");
   const [fullName, setFullName] = useState("");
@@ -239,11 +240,11 @@ export function ProfileClient() {
         <h1 className="section-title text-2xl font-black">Account Panel</h1>
         <p className="mt-1 text-sm text-[var(--color-muted)]">Manage profile, password, login sessions, bookmarks, and avatar.</p>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div className={`mt-4 grid gap-3 ${isAdmin ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
           <section className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Account</p>
             <p className="mt-1 text-sm font-semibold text-[var(--color-ink)]">{user.email}</p>
-            <p className="mt-1 text-xs text-[var(--color-muted)]">Role: {profile?.role === "admin" ? "Admin" : "User"}</p>
+            <p className="mt-1 text-xs text-[var(--color-muted)]">Role: {isAdmin ? "Admin" : "User"}</p>
           </section>
           <section className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Appearance and Session</p>
@@ -267,6 +268,15 @@ export function ProfileClient() {
               </button>
             </div>
           </section>
+          {isAdmin ? (
+            <section className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Admin</p>
+              <p className="mt-1 text-sm text-[var(--color-muted)]">Manage submissions, tools, and resources.</p>
+              <Link href="/admin" className="mt-3 inline-flex rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-[var(--color-paper)]">
+                Open Admin Dashboard
+              </Link>
+            </section>
+          ) : null}
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
