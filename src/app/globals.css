@@ -30,6 +30,9 @@
   --text-gradient-start: #0d2018;
   --text-gradient-end: #127a58;
   --brand-ring: rgba(18, 122, 88, 0.3);
+  --panel-premium-a: rgba(255, 255, 255, 0.72);
+  --panel-premium-b: rgba(245, 251, 247, 0.72);
+  --panel-premium-glow: rgba(18, 122, 88, 0.12);
 }
 
 [data-theme="dark"] {
@@ -62,6 +65,9 @@
   --shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.34);
   --shadow-strong: 0 24px 52px rgba(0, 0, 0, 0.46);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --panel-premium-a: rgba(18, 30, 45, 0.9);
+  --panel-premium-b: rgba(10, 18, 30, 0.86);
+  --panel-premium-glow: rgba(62, 160, 255, 0.16);
 }
 
 @theme inline {
@@ -232,8 +238,8 @@ textarea::placeholder {
 .premium-panel {
   border: 1px solid var(--glass-border);
   background:
-    linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(245, 251, 247, 0.72)),
-    radial-gradient(circle at 80% -20%, rgba(18, 122, 88, 0.12), transparent 40%);
+    linear-gradient(140deg, var(--panel-premium-a), var(--panel-premium-b)),
+    radial-gradient(circle at 80% -20%, var(--panel-premium-glow), transparent 40%);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow-inset), var(--shadow-soft);
   animation: pop-in 440ms ease-out;
