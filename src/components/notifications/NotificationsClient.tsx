@@ -21,12 +21,18 @@ export function NotificationsClient() {
       return;
     }
 
-    const { data } = await supabase
+    // Two FKs point at profiles (user_id + actor_id) — must disambiguate
+    // or PostgREST returns PGRST201 and the page renders empty.
+    const { data, error } = await supabase
       .from("notifications")
-      .select("*, profiles(id, username, full_name, avatar_url)")
+      .select("*, profiles!notifications_actor_id_fkey(id, username, full_name, avatar_url)")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50);
+
+    if (error) {
+      console.error("Failed to load notifications:", error.message);
+    }
 
     setNotifications((data as unknown as NotificationWithActor[]) ?? []);
     setIsLoading(false);
