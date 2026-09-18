@@ -95,7 +95,9 @@ export function ProfilePageClient({ username }: ProfilePageClientProps) {
   // ===== CASE 1: Portfolio configured → live portfolio IS the profile =====
   if (source && !showSocialProfile) {
     return (
-      <div className="fixed inset-0 z-40 flex flex-col bg-[var(--color-paper)]" style={{ top: "3.5rem" }}>
+      <div
+        className="fixed inset-x-0 bottom-0 top-14 z-40 flex flex-col bg-[var(--color-paper)] pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"
+      >
         {/* Minimal bar: back + username + social profile link */}
         <div className="flex h-11 shrink-0 items-center gap-3 border-b border-[var(--color-line)] bg-[var(--color-overlay)] px-4 backdrop-blur-xl">
           <button
