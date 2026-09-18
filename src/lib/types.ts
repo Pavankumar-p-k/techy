@@ -64,6 +64,12 @@ export interface Database {
           link_x: string | null;
           link_other: string | null;
           show_links: boolean;
+          portfolio_enabled: boolean;
+          portfolio_type: "html" | "zip" | "external" | null;
+          portfolio_html: string | null;
+          portfolio_storage_path: string | null;
+          portfolio_external_url: string | null;
+          portfolio_updated_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -91,6 +97,12 @@ export interface Database {
           link_x?: string | null;
           link_other?: string | null;
           show_links?: boolean;
+          portfolio_enabled?: boolean;
+          portfolio_type?: "html" | "zip" | "external" | null;
+          portfolio_html?: string | null;
+          portfolio_storage_path?: string | null;
+          portfolio_external_url?: string | null;
+          portfolio_updated_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -118,6 +130,12 @@ export interface Database {
           link_x?: string | null;
           link_other?: string | null;
           show_links?: boolean;
+          portfolio_enabled?: boolean;
+          portfolio_type?: "html" | "zip" | "external" | null;
+          portfolio_html?: string | null;
+          portfolio_storage_path?: string | null;
+          portfolio_external_url?: string | null;
+          portfolio_updated_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

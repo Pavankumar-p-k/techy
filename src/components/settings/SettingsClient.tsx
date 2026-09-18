@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
+import { PortfolioSettings } from "@/components/settings/PortfolioSettings";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { communityProfileSchema } from "@/lib/validation";
 import { getInitials } from "@/lib/utils";
 
-type SettingsTab = "profile" | "security";
+type SettingsTab = "profile" | "portfolio" | "security";
 
 const SKILL_PRESETS = ["Python", "JavaScript", "React", "AI/ML", "Java", "C++", "Node.js", "Flutter", "SQL", "Git"];
 
@@ -296,6 +297,9 @@ export function SettingsClient() {
         <div className="segmented">
           <button type="button" data-active={activeTab === "profile"} onClick={() => setActiveTab("profile")}>
             Edit Profile
+          </button>
+          <button type="button" data-active={activeTab === "portfolio"} onClick={() => setActiveTab("portfolio")}>
+            Portfolio
           </button>
           <button type="button" data-active={activeTab === "security"} onClick={() => setActiveTab("security")}>
             Security
