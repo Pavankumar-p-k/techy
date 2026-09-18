@@ -307,7 +307,11 @@ export function SettingsClient() {
         </div>
       </div>
 
-      {activeTab === "profile" ? (
+      {activeTab === "portfolio" ? (
+        <div className="mt-4">
+          <PortfolioSettings username={profile?.username ?? ""} />
+        </div>
+      ) : activeTab === "profile" ? (
         <form onSubmit={handleSaveProfile} className="card mt-4 space-y-4 p-5">
           {/* Avatar */}
           <div className="flex items-center gap-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-3">

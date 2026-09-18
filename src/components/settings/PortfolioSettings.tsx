@@ -1,5 +1,6 @@
 "use client";
 
+import JSZip from "jszip";
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PortfolioRenderer, type PortfolioSource } from "@/components/portfolio/PortfolioRenderer";

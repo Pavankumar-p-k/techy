@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect -- loading/blocked state derives from iframe lifecycle events, not render data */
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
