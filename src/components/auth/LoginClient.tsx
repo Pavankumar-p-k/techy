@@ -38,19 +38,21 @@ export function LoginClient({ nextPath }: LoginClientProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-10 md:px-6">
-      <section className="premium-panel rounded-2xl p-6">
-        <h1 className="section-title text-2xl font-black">Login</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">{user ? "You are already signed in." : "Access your student tool profile."}</p>
+    <div className="container-app flex justify-center py-10 md:py-16">
+      <div className="card w-full max-w-md p-6 sm:p-8 fade-in-up">
+        <h1 className="section-title text-2xl font-black tracking-tight">Login</h1>
+        <p className="mt-1 text-sm text-[var(--color-muted)]">
+          {user ? "You are already signed in." : "Access your student tool profile."}
+        </p>
 
         {user ? (
-          <div className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
+          <div className="mt-5 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-4">
             <p className="text-sm text-[var(--color-muted)]">Signed in as {user.email}</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href={nextPath} className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-[var(--color-paper)]">
+              <Link href={nextPath} className="btn btn-primary btn-sm">
                 Continue
               </Link>
-              <Link href="/profile" className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)]">
+              <Link href="/profile" className="btn btn-ghost btn-sm">
                 Open Profile
               </Link>
             </div>
@@ -58,49 +60,56 @@ export function LoginClient({ nextPath }: LoginClientProps) {
         ) : null}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <label className="block text-sm text-[var(--color-muted)]">
+          <label className="label">
             Email
             <input
               type="email"
               required
+              autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
+              className="field"
             />
           </label>
 
-          <label className="block text-sm text-[var(--color-muted)]">
+          <label className="label">
             Password
             <input
               type="password"
               required
+              autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
+              className="field"
             />
           </label>
 
-          <button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-[var(--color-ink)] px-5 py-2 text-sm font-semibold text-[var(--color-paper)] transition hover:bg-[var(--color-accent)] disabled:opacity-60">
+          <button type="submit" disabled={isSubmitting} className="btn btn-primary btn-lg w-full">
             {isSubmitting ? "Signing in..." : "Login"}
           </button>
         </form>
 
-        {message ? <p className="mt-4 text-sm text-[var(--color-danger)]">{message}</p> : null}
+        {message ? (
+          <p className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-danger-soft)] px-3 py-2 text-sm text-[var(--color-danger)]">
+            {message}
+          </p>
+        ) : null}
 
-        <p className="mt-4 text-sm text-[var(--color-muted)]">
+        <p className="mt-5 text-sm text-[var(--color-muted)]">
           New user?{" "}
-          <Link href="/register" className="font-semibold text-[var(--color-accent)]">
+          <Link href="/register" className="font-semibold text-[var(--color-ink)] underline underline-offset-4">
             Create account
           </Link>
         </p>
 
-        <div className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Admin login</p>
-          <p className="mt-1 text-xs text-[var(--color-muted)]">
-            Login with your normal account, then ensure your profile role is promoted to admin in Supabase. After that, open <code>/admin</code>.
+        <div className="mt-6 rounded-xl border border-dashed border-[var(--color-line)] bg-[var(--color-surface-2)] p-3">
+          <p className="overline">Admin login</p>
+          <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+            Login with your normal account, then ensure your profile role is promoted to admin in Supabase. After that, open{" "}
+            <code className="rounded bg-[var(--color-surface-3)] px-1 py-0.5 font-mono text-[11px]">/admin</code>.
           </p>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

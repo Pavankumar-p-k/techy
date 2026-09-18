@@ -103,3 +103,142 @@ export const profileUpdateSchema = z.object({
 export type ToolSubmissionInput = z.infer<typeof toolSubmissionInputSchema>;
 export type ReviewInput = z.infer<typeof reviewInputSchema>;
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
+
+// ============================================================
+// Social community schemas
+// ============================================================
+
+export const usernameSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3, "Username must be at least 3 characters.")
+  .max(24, "Username must be at most 24 characters.")
+  .regex(/^[a-z0-9_]+$/, "Username can only include lowercase letters, numbers, and underscores.");
+
+export const socialLinksSchema = z
+  .object({
+    github: z
+      .string()
+      .trim()
+      .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "GitHub link must be a valid http(s) URL.")
+      .transform((v) => v || null),
+    linkedin: z
+      .string()
+      .trim()
+      .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "LinkedIn link must be a valid http(s) URL.")
+      .transform((v) => v || null),
+    instagram: z
+      .string()
+      .trim()
+      .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Instagram link must be a valid http(s) URL.")
+      .transform((v) => v || null),
+    portfolio: z
+      .string()
+      .trim()
+      .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Portfolio link must be a valid http(s) URL.")
+      .transform((v) => v || null),
+    youtube: z
+      .string()
+      .trim()
+      .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "YouTube link must be a valid http(s) URL.")
+      .transform((v) => v || null),
+    x: z
+      .string()
+      .trim()
+      .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "X link must be a valid http(s) URL.")
+      .transform((v) => v || null),
+    other: z
+      .string()
+      .trim()
+      .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Custom link must be a valid http(s) URL.")
+      .transform((v) => v || null),
+  })
+  .partial({ github: true, linkedin: true });
+
+export const communityProfileSchema = profileUpdateSchema.extend({
+  username: usernameSchema,
+  branch: z.string().trim().max(60, "Branch is too long.").transform((v) => v || null),
+  year: z.string().trim().max(20, "Year is too long.").transform((v) => v || null),
+  college: z.string().trim().max(120, "College name is too long.").transform((v) => v || null),
+  skills: z.array(z.string().trim().min(1).max(30)).max(15, "Up to 15 skills."),
+  toolsUsed: z.array(z.string().trim().min(1).max(30)).max(15, "Up to 15 tools."),
+  interests: z.array(z.string().trim().min(1).max(30)).max(10, "Up to 10 interests."),
+  currentlyBuilding: z.string().trim().max(280).transform((v) => v || null),
+  lookingFor: z.string().trim().max(280).transform((v) => v || null),
+  links: socialLinksSchema,
+});
+
+export const postTypeSchema = z.enum([
+  "normal",
+  "project",
+  "achievement",
+  "course_completion",
+  "learning_update",
+  "project_update",
+]);
+
+export const postInputSchema = z.object({
+  postType: postTypeSchema,
+  title: z.string().trim().max(120, "Title should be under 120 characters.").transform((v) => v || null),
+  content: z.string().trim().min(1, "Write something first.").max(3000, "Post should be under 3000 characters."),
+  imageUrl: z
+    .string()
+    .trim()
+    .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Image URL must be a valid http(s) URL.")
+    .transform((v) => v || null),
+  tags: z
+    .array(z.string().trim().toLowerCase().min(1).max(24))
+    .max(8, "Up to 8 tags.")
+    .transform((tags) => Array.from(new Set(tags))),
+  projectId: z.string().uuid().nullable().optional(),
+});
+
+export const commentInputSchema = z.object({
+  content: z.string().trim().min(1, "Comment cannot be empty.").max(1000, "Comment should be under 1000 characters."),
+});
+
+export const projectInputSchema = z.object({
+  title: z.string().trim().min(2, "Project title is required.").max(120, "Title should be under 120 characters."),
+  description: z.string().trim().min(16, "Description should be at least 16 characters.").max(6000, "Description is too long."),
+  category: z.string().trim().min(2).max(40),
+  status: z.enum(["planning", "building", "completed", "maintaining", "archived"]),
+  coverUrl: z
+    .string()
+    .trim()
+    .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Cover image must be a valid http(s) URL.")
+    .transform((v) => v || null),
+  demoUrl: z
+    .string()
+    .trim()
+    .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Demo link must be a valid http(s) URL.")
+    .transform((v) => v || null),
+  githubUrl: z
+    .string()
+    .trim()
+    .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "GitHub link must be a valid http(s) URL.")
+    .transform((v) => v || null),
+  otherUrl: z
+    .string()
+    .trim()
+    .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Link must be a valid http(s) URL.")
+    .transform((v) => v || null),
+  technologies: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 technologies."),
+  toolsUsed: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 tools."),
+});
+
+export const feedbackInputSchema = z.object({
+  feedbackType: z.enum(["bug", "suggestion", "question", "improvement"]),
+  content: z.string().trim().min(4, "Feedback should be at least 4 characters.").max(2000, "Feedback is too long."),
+});
+
+export const messageInputSchema = z.object({
+  content: z.string().trim().min(1, "Message cannot be empty.").max(4000, "Message is too long."),
+});
+
+export type CommunityProfileInput = z.infer<typeof communityProfileSchema>;
+export type PostInput = z.infer<typeof postInputSchema>;
+export type CommentInput = z.infer<typeof commentInputSchema>;
+export type ProjectInput = z.infer<typeof projectInputSchema>;
+export type FeedbackInput = z.infer<typeof feedbackInputSchema>;
+export type MessageInput = z.infer<typeof messageInputSchema>;

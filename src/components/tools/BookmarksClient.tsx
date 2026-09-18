@@ -86,34 +86,45 @@ export function BookmarksClient() {
   }, [currentPage, sortedItems]);
 
   if (loading || isLoading) {
-    return <p className="mx-auto w-full max-w-5xl px-4 py-10 text-sm text-[var(--color-muted)] md:px-6">Loading bookmarks...</p>;
+    return (
+      <div className="container-app py-10">
+        <div className="skeleton h-8 w-48" />
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="skeleton h-40 w-full" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
-        <section className="premium-panel rounded-2xl p-6">
-          <h1 className="section-title text-2xl font-black">Bookmarks</h1>
+      <div className="container-app flex justify-center py-10 md:py-16">
+        <div className="card w-full max-w-md p-6 text-center sm:p-8">
+          <h1 className="section-title text-2xl font-black tracking-tight">Bookmarks</h1>
           <p className="mt-2 text-sm text-[var(--color-muted)]">Login to view your saved tools.</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/login?next=/bookmarks" className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-[var(--color-paper)]">
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Link href="/login?next=/bookmarks" className="btn btn-primary btn-md">
               Login
             </Link>
-            <Link href="/register" className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)]">
+            <Link href="/register" className="btn btn-ghost btn-md">
               Create Account
             </Link>
           </div>
-        </section>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
-      <h1 className="section-title text-3xl font-black">Bookmarks</h1>
-      <p className="mt-1 text-sm text-[var(--color-muted)]">Your saved tools for quick access.</p>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <label className="text-sm text-[var(--color-muted)]">
+    <div className="container-app py-8 md:py-10">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="section-title text-3xl font-black tracking-tight">Bookmarks</h1>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">Your saved tools for quick access.</p>
+        </div>
+        <label className="label w-full sm:w-auto">
           Sort by
           <select
             value={sortBy}
@@ -121,77 +132,101 @@ export function BookmarksClient() {
               setSortBy(event.target.value as BookmarkSortOption);
               setPage(1);
             }}
-            className="ml-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm text-[var(--color-ink)]"
+            className="field sm:w-48"
           >
             <option value="saved_recent">Recently saved</option>
             <option value="top_rated">Top rated</option>
             <option value="name_az">Name A-Z</option>
           </select>
         </label>
-        <p className="text-sm text-[var(--color-muted)]">
-          Page {currentPage} of {totalPages}
-        </p>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {sortedItems.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-muted)]">
-            No bookmarks yet.
-          </p>
-        ) : (
-          paginatedItems.map((item) => (
-            <article key={item.id} className="interactive-lift premium-panel rounded-2xl p-4">
-              <div className="mb-3 overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)]">
-                {getToolLogoUrl(item.tools.logo_url, item.tools.url) ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={getToolLogoUrl(item.tools.logo_url, item.tools.url) ?? ""} alt={`${item.tools.name} logo`} className="h-24 w-full object-cover" />
-                ) : (
-                  <div className="grid h-24 place-items-center bg-gradient-to-br from-[var(--color-accent-soft)] to-white">
-                    <span className="rounded-2xl bg-white/90 px-3 py-2 text-lg font-black text-[var(--color-ink)]">{getInitials(item.tools.name)}</span>
-                  </div>
-                )}
-              </div>
-              <p className="text-xs uppercase tracking-wide text-[var(--color-muted)]">{item.tools.category}</p>
-              <h2 className="mt-1 text-lg font-bold text-[var(--color-ink)]">{item.tools.name}</h2>
-              <p className="mt-2 line-clamp-2 text-sm text-[var(--color-muted)]">{item.tools.short_description}</p>
-              <p className="mt-2 text-xs font-semibold text-[var(--color-accent)]">{FREE_TYPE_LABELS[item.tools.free_type]}</p>
-              <p className="mt-2 text-xs text-[var(--color-muted)]">Saved {formatDate(item.created_at)}</p>
-              <div className="mt-4 flex gap-2">
-                <Link href={`/tools/${item.tools.slug}`} className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-[var(--color-paper)]">
-                  Open
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => removeBookmark(item.tool_id)}
-                  className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)]"
-                >
-                  Remove
-                </button>
-              </div>
-            </article>
-          ))
-        )}
-      </div>
-      {sortedItems.length > 0 && totalPages > 1 ? (
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => setPage((current) => Math.max(1, Math.min(current, totalPages) - 1))}
-            disabled={currentPage === 1}
-            className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] disabled:opacity-45"
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            onClick={() => setPage((current) => Math.min(totalPages, Math.min(current, totalPages) + 1))}
-            disabled={currentPage === totalPages}
-            className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] disabled:opacity-45"
-          >
-            Next
-          </button>
+      {sortedItems.length === 0 ? (
+        <div className="mt-8 rounded-2xl border border-dashed border-[var(--color-line)] p-10 text-center">
+          <p className="text-3xl" aria-hidden="true">☆</p>
+          <p className="mt-2 text-sm font-semibold text-[var(--color-ink)]">No bookmarks yet</p>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">Browse the tool catalog and save what you like.</p>
+          <Link href="/" className="btn btn-primary btn-md mt-5">
+            Browse Tools
+          </Link>
         </div>
-      ) : null}
+      ) : (
+        <>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {paginatedItems.map((item) => {
+              const logoUrl = getToolLogoUrl(item.tools.logo_url, item.tools.url);
+              return (
+                <article key={item.id} className="card card-hover p-4">
+                  <div className="flex gap-3">
+                    {/* Thumb */}
+                    <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-[var(--color-line)] bg-gradient-to-br from-[var(--color-surface-2)] to-[var(--color-accent-soft)]">
+                      {logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={logoUrl}
+                          alt={`${item.tools.name} logo`}
+                          className="h-10 w-10 rounded-lg bg-white object-contain p-0.5 shadow-[var(--shadow-soft)] ring-1 ring-[var(--color-line)]"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="grid h-9 w-9 place-items-center rounded-lg bg-[var(--color-ink)] text-xs font-black text-[var(--color-paper)]">
+                          {getInitials(item.tools.name)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="min-w-0 flex-1">
+                      <p className="overline">{item.tools.category}</p>
+                      <h2 className="truncate text-base font-bold text-[var(--color-ink)]">{item.tools.name}</h2>
+                      <p className="line-clamp-2 mt-0.5 text-xs leading-5 text-[var(--color-muted)]">{item.tools.short_description}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--color-line)] pt-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="pill pill-accent">{FREE_TYPE_LABELS[item.tools.free_type]}</span>
+                      <span className="text-[11px] text-[var(--color-faint)]">Saved {formatDate(item.created_at)}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Link href={`/tools/${item.tools.slug}`} className="btn btn-primary btn-sm">
+                        Open
+                      </Link>
+                      <button type="button" onClick={() => removeBookmark(item.tool_id)} className="btn btn-ghost btn-sm">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          {totalPages > 1 ? (
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.max(1, Math.min(current, totalPages) - 1))}
+                disabled={currentPage === 1}
+                className="btn btn-ghost btn-md"
+              >
+                Previous
+              </button>
+              <span className="text-xs font-semibold text-[var(--color-muted)]">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.min(totalPages, Math.min(current, totalPages) + 1))}
+                disabled={currentPage === totalPages}
+                className="btn btn-ghost btn-md"
+              >
+                Next
+              </button>
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

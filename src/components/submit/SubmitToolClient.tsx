@@ -24,6 +24,7 @@ export function SubmitToolClient() {
   const [tagsInput, setTagsInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -126,6 +127,7 @@ export function SubmitToolClient() {
 
     if (error) {
       setMessage(error.message);
+      setIsSuccess(false);
     } else {
       setName("");
       setUrl("");
@@ -133,6 +135,7 @@ export function SubmitToolClient() {
       setHowItWorks("");
       setFreeDetails("");
       setTagsInput("");
+      setIsSuccess(true);
       setMessage("Submitted. Admin will review and publish.");
     }
 
@@ -140,64 +143,54 @@ export function SubmitToolClient() {
   }
 
   if (loading) {
-    return <p className="mx-auto w-full max-w-3xl px-4 py-10 text-sm text-[var(--color-muted)] md:px-6">Loading...</p>;
+    return (
+      <div className="container-app py-10">
+        <div className="skeleton mx-auto h-8 w-48" />
+        <div className="skeleton mx-auto mt-4 h-64 w-full max-w-3xl" />
+      </div>
+    );
   }
 
   if (!user) {
     return (
-      <div className="mx-auto w-full max-w-3xl px-4 py-10 md:px-6">
-        <section className="premium-panel rounded-2xl p-6">
-          <h1 className="section-title text-2xl font-black">Login Required</h1>
+      <div className="container-app flex justify-center py-10 md:py-16">
+        <div className="card w-full max-w-md p-6 text-center sm:p-8">
+          <h1 className="section-title text-2xl font-black tracking-tight">Login Required</h1>
           <p className="mt-2 text-sm text-[var(--color-muted)]">You need an account to submit tools.</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/login?next=/submit" className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-[var(--color-paper)]">
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Link href="/login?next=/submit" className="btn btn-primary btn-md">
               Login
             </Link>
-            <Link href="/register" className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)]">
+            <Link href="/register" className="btn btn-ghost btn-md">
               Create Account
             </Link>
           </div>
-        </section>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6 md:py-10">
-      <section className="premium-panel rounded-2xl p-6">
-        <h1 className="section-title text-2xl font-black">Submit a New Tool</h1>
+    <div className="container-app max-w-3xl py-8 md:py-10">
+      <div className="card p-6 sm:p-8 fade-in-up">
+        <h1 className="section-title text-2xl font-black tracking-tight sm:text-3xl">Submit a New Tool</h1>
         <p className="mt-1 text-sm text-[var(--color-muted)]">Help other students discover useful free platforms.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
-          <label className="text-sm text-[var(--color-muted)]">
+          <label className="label">
             Tool name
-            <input
-              required
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
-            />
+            <input required value={name} onChange={(event) => setName(event.target.value)} className="field" />
           </label>
 
-          <label className="text-sm text-[var(--color-muted)]">
+          <label className="label">
             Official URL
-            <input
-              required
-              type="url"
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
-            />
+            <input required type="url" value={url} onChange={(event) => setUrl(event.target.value)} className="field" />
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="text-sm text-[var(--color-muted)]">
+            <label className="label">
               Category
-              <select
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
-              >
+              <select value={category} onChange={(event) => setCategory(event.target.value)} className="field">
                 {TOOL_CATEGORIES.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -206,13 +199,9 @@ export function SubmitToolClient() {
               </select>
             </label>
 
-            <label className="text-sm text-[var(--color-muted)]">
+            <label className="label">
               Free model
-              <select
-                value={freeType}
-                onChange={(event) => setFreeType(event.target.value as FreeType)}
-                className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
-              >
+              <select value={freeType} onChange={(event) => setFreeType(event.target.value as FreeType)} className="field">
                 {FREE_TYPES.map((item) => (
                   <option key={item} value={item}>
                     {FREE_TYPE_LABELS[item]}
@@ -222,60 +211,49 @@ export function SubmitToolClient() {
             </label>
           </div>
 
-          <label className="text-sm text-[var(--color-muted)]">
+          <label className="label">
             Short description
-            <textarea
-              required
-              rows={2}
-              value={shortDescription}
-              onChange={(event) => setShortDescription(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
-            />
+            <textarea required rows={2} value={shortDescription} onChange={(event) => setShortDescription(event.target.value)} className="field" />
           </label>
 
-          <label className="text-sm text-[var(--color-muted)]">
+          <label className="label">
             How it works
-            <textarea
-              required
-              rows={4}
-              value={howItWorks}
-              onChange={(event) => setHowItWorks(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
-            />
+            <textarea required rows={4} value={howItWorks} onChange={(event) => setHowItWorks(event.target.value)} className="field" />
           </label>
 
-          <label className="text-sm text-[var(--color-muted)]">
+          <label className="label">
             Free details
-            <textarea
-              required
-              rows={3}
-              value={freeDetails}
-              onChange={(event) => setFreeDetails(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
-            />
+            <textarea required rows={3} value={freeDetails} onChange={(event) => setFreeDetails(event.target.value)} className="field" />
           </label>
 
-          <label className="text-sm text-[var(--color-muted)]">
+          <label className="label">
             Tags (comma separated)
             <input
               value={tagsInput}
               onChange={(event) => setTagsInput(event.target.value)}
               placeholder="coding, productivity, beginner"
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
+              className="field"
             />
           </label>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-fit rounded-full bg-[var(--color-accent)] px-5 py-2 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-60"
-          >
-            {submitting ? "Submitting..." : "Submit for Review"}
-          </button>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button type="submit" disabled={submitting} className="btn btn-accent btn-lg">
+              {submitting ? "Submitting..." : "Submit for Review"}
+            </button>
+            {message ? (
+              <p
+                className={`rounded-xl px-3 py-2 text-sm ${
+                  isSuccess
+                    ? "bg-[var(--color-success-soft)] text-[var(--color-success)]"
+                    : "bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
+                }`}
+              >
+                {message}
+              </p>
+            ) : null}
+          </div>
         </form>
-
-        {message ? <p className="mt-4 text-sm text-[var(--color-muted)]">{message}</p> : null}
-      </section>
+      </div>
     </div>
   );
 }

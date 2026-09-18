@@ -248,63 +248,81 @@ export function AdminDashboardClient() {
   }
 
   if (loading) {
-    return <p className="mx-auto w-full max-w-6xl px-4 py-10 text-sm text-[var(--color-muted)] md:px-6">Checking access...</p>;
+    return (
+      <div className="container-app py-10">
+        <div className="skeleton h-8 w-64" />
+        <div className="skeleton mt-6 h-40 w-full" />
+      </div>
+    );
   }
 
   if (!user) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
-        <section className="premium-panel rounded-2xl p-6">
-          <h1 className="section-title text-3xl font-black">Admin Page</h1>
+      <div className="container-app flex justify-center py-10 md:py-16">
+        <div className="card w-full max-w-md p-6 text-center sm:p-8">
+          <h1 className="section-title text-2xl font-black tracking-tight">Admin Page</h1>
           <p className="mt-2 text-sm text-[var(--color-muted)]">Login with your account first, then admin access is verified from your profile role.</p>
-          <Link href="/login?next=/admin" className="mt-4 inline-flex rounded-full bg-[var(--color-ink)] px-5 py-2 text-sm font-semibold text-[var(--color-paper)]">
+          <Link href="/login?next=/admin" className="btn btn-primary btn-md mt-5">
             Login to Continue
           </Link>
-        </section>
+        </div>
       </div>
     );
   }
 
   if (!isAdmin) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
-        <section className="premium-panel rounded-2xl p-6">
-          <h1 className="section-title text-3xl font-black">Admin Access Required</h1>
+      <div className="container-app flex justify-center py-10 md:py-16">
+        <div className="card w-full max-w-lg p-6 text-center sm:p-8">
+          <h1 className="section-title text-2xl font-black tracking-tight">Admin Access Required</h1>
           <p className="mt-2 text-sm text-[var(--color-muted)]">Your current account is logged in, but role is not admin.</p>
-          <p className="mt-3 text-sm text-[var(--color-muted)]">Promote this account in Supabase SQL editor with:</p>
-          <code className="mt-2 block rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2 text-xs text-[var(--color-ink)]">
+          <p className="mt-4 text-sm text-[var(--color-muted)]">Promote this account in Supabase SQL editor with:</p>
+          <code className="mt-2 block overflow-x-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] px-3 py-2 text-left font-mono text-xs text-[var(--color-ink)]">
             select public.set_admin_by_email(&apos;{user.email}&apos;);
           </code>
           <p className="mt-3 text-xs text-[var(--color-muted)]">After promotion, sign out and login again, then open /admin.</p>
-        </section>
+        </div>
       </div>
     );
   }
 
   if (isLoading) {
-    return <p className="mx-auto w-full max-w-6xl px-4 py-10 text-sm text-[var(--color-muted)] md:px-6">Loading admin dashboard...</p>;
+    return (
+      <div className="container-app py-10">
+        <div className="skeleton h-8 w-64" />
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="skeleton h-20 w-full" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-10">
+    <div className="container-app py-8 md:py-10">
+      {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="section-title text-3xl font-black">Admin Control Center</h1>
+          <h1 className="section-title text-3xl font-black tracking-tight">Admin Control Center</h1>
           <p className="mt-1 text-sm text-[var(--color-muted)]">Moderation, tool lifecycle control, and resource management in one place.</p>
         </div>
-        <button
-          type="button"
-          onClick={refreshData}
-          disabled={isRefreshing}
-          className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] disabled:opacity-60"
-        >
-          {isRefreshing ? "Refreshing..." : "Refresh"}
+        <button type="button" onClick={refreshData} disabled={isRefreshing} className="btn btn-ghost btn-md">
+          {isRefreshing ? "Refreshing..." : "↻ Refresh"}
         </button>
       </div>
 
-      {message ? <p className="premium-panel mt-4 rounded-xl p-3 text-sm text-[var(--color-muted)]">{message}</p> : null}
+      {message ? (
+        <div className="card mt-4 flex items-center justify-between gap-3 p-3">
+          <p className="text-sm text-[var(--color-muted)]">{message}</p>
+          <button type="button" onClick={() => setMessage(null)} className="text-xs font-semibold text-[var(--color-faint)] hover:text-[var(--color-ink)]">
+            Dismiss
+          </button>
+        </div>
+      ) : null}
 
-      <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Metrics */}
+      <section className="stagger-fade mt-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
         <StatCard label="Pending submissions" value={metrics.pendingSubmissions.toString()} />
         <StatCard label="Pending tools" value={metrics.pendingTools.toString()} />
         <StatCard label="Published tools" value={metrics.publishedTools.toString()} />
@@ -313,59 +331,61 @@ export function AdminDashboardClient() {
         <StatCard label="Platform resources" value={metrics.resourceCount.toString()} />
       </section>
 
-      <section className="mt-6 flex flex-wrap gap-2">
-        <TabButton label="Moderation Queue" active={activeTab === "moderation"} onClick={() => setActiveTab("moderation")} />
-        <TabButton label="Tool Manager" active={activeTab === "tools"} onClick={() => setActiveTab("tools")} />
-        <TabButton label="Resources Manager" active={activeTab === "resources"} onClick={() => setActiveTab("resources")} />
+      {/* Tabs */}
+      <section className="mt-6 overflow-x-auto pb-1">
+        <div className="segmented">
+          <button type="button" data-active={activeTab === "moderation"} onClick={() => setActiveTab("moderation")}>
+            Moderation Queue
+          </button>
+          <button type="button" data-active={activeTab === "tools"} onClick={() => setActiveTab("tools")}>
+            Tool Manager
+          </button>
+          <button type="button" data-active={activeTab === "resources"} onClick={() => setActiveTab("resources")}>
+            Resources Manager
+          </button>
+        </div>
       </section>
 
       {activeTab === "moderation" ? (
         <section className="mt-6 space-y-8">
           <div>
-            <h2 className="text-xl font-bold text-[var(--color-ink)]">Pending submissions</h2>
-            <div className="mt-4 space-y-4">
+            <h2 className="text-lg font-bold text-[var(--color-ink)]">Pending submissions</h2>
+            <div className="mt-4 space-y-3">
               {submissions.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-muted)]">No pending submissions.</p>
+                <p className="rounded-xl border border-dashed border-[var(--color-line)] p-6 text-center text-sm text-[var(--color-muted)]">No pending submissions.</p>
               ) : (
                 submissions.map((item) => (
-                  <article key={item.id} className="premium-panel rounded-2xl p-5">
+                  <article key={item.id} className="card p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <p className="text-xs uppercase tracking-wide text-[var(--color-muted)]">
-                          {item.category} | {FREE_TYPE_LABELS[item.free_type]}
-                        </p>
-                        <h3 className="text-lg font-bold text-[var(--color-ink)]">{item.name}</h3>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="pill pill-accent">{item.category}</span>
+                          <span className="pill pill-neutral">{FREE_TYPE_LABELS[item.free_type]}</span>
+                        </div>
+                        <h3 className="mt-2 text-lg font-bold text-[var(--color-ink)]">{item.name}</h3>
                       </div>
-                      <p className="text-xs text-[var(--color-muted)]">{formatDate(item.created_at)}</p>
+                      <p className="text-xs text-[var(--color-faint)]">{formatDate(item.created_at)}</p>
                     </div>
 
                     <p className="mt-2 text-sm text-[var(--color-muted)]">{item.short_description}</p>
-                    <p className="mt-2 text-sm text-[var(--color-muted)]">{item.how_it_works}</p>
-                    <a href={item.url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-[var(--color-accent)]">
+                    <p className="mt-1 text-sm text-[var(--color-muted)]">{item.how_it_works}</p>
+                    <a href={item.url} target="_blank" rel="noreferrer" className="mt-2 inline-block break-all text-sm font-semibold text-[var(--color-ink)] underline underline-offset-4">
                       {item.url}
                     </a>
 
                     <textarea
                       rows={2}
-                      placeholder="Moderation note"
+                      placeholder="Moderation note (optional)"
                       value={noteById[item.id] ?? ""}
                       onChange={(event) => setNoteById((current) => ({ ...current, [item.id]: event.target.value }))}
-                      className="mt-3 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                      className="field mt-3"
                     />
 
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => approveSubmission(item.id)}
-                        className="rounded-full bg-[var(--color-success)] px-4 py-2 text-sm font-semibold text-white"
-                      >
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button type="button" onClick={() => approveSubmission(item.id)} className="btn btn-success btn-md">
                         Approve + Publish
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => rejectSubmission(item.id)}
-                        className="rounded-full bg-[var(--color-danger)] px-4 py-2 text-sm font-semibold text-white"
-                      >
+                      <button type="button" onClick={() => rejectSubmission(item.id)} className="btn btn-danger btn-md">
                         Reject
                       </button>
                     </div>
@@ -376,43 +396,35 @@ export function AdminDashboardClient() {
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-[var(--color-ink)]">Direct pending tools</h2>
-            <div className="mt-4 space-y-4">
+            <h2 className="text-lg font-bold text-[var(--color-ink)]">Direct pending tools</h2>
+            <div className="mt-4 space-y-3">
               {pendingTools.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-muted)]">No pending tools.</p>
+                <p className="rounded-xl border border-dashed border-[var(--color-line)] p-6 text-center text-sm text-[var(--color-muted)]">No pending tools.</p>
               ) : (
                 pendingTools.map((item) => (
-                  <article key={item.id} className="premium-panel rounded-2xl p-5">
+                  <article key={item.id} className="card p-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <h3 className="text-lg font-bold text-[var(--color-ink)]">{item.name}</h3>
                       <StatusPill status={item.status} />
                     </div>
                     <p className="mt-1 text-sm text-[var(--color-muted)]">{item.short_description}</p>
-                    <a href={item.url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-[var(--color-accent)]">
+                    <a href={item.url} target="_blank" rel="noreferrer" className="mt-2 inline-block break-all text-sm font-semibold text-[var(--color-ink)] underline underline-offset-4">
                       {item.url}
                     </a>
 
                     <textarea
                       rows={2}
-                      placeholder="Moderation note"
+                      placeholder="Moderation note (optional)"
                       value={noteById[item.id] ?? ""}
                       onChange={(event) => setNoteById((current) => ({ ...current, [item.id]: event.target.value }))}
-                      className="mt-3 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                      className="field mt-3"
                     />
 
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => updateToolStatus(item.id, "published")}
-                        className="rounded-full bg-[var(--color-success)] px-4 py-2 text-sm font-semibold text-white"
-                      >
+                      <button type="button" onClick={() => updateToolStatus(item.id, "published")} className="btn btn-success btn-md">
                         Publish
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => updateToolStatus(item.id, "rejected")}
-                        className="rounded-full bg-[var(--color-danger)] px-4 py-2 text-sm font-semibold text-white"
-                      >
+                      <button type="button" onClick={() => updateToolStatus(item.id, "rejected")} className="btn btn-danger btn-md">
                         Reject
                       </button>
                     </div>
@@ -426,23 +438,23 @@ export function AdminDashboardClient() {
 
       {activeTab === "tools" ? (
         <section className="mt-6">
-          <div className="premium-panel rounded-2xl p-4">
-            <div className="grid gap-3 md:grid-cols-[1fr_220px]">
-              <label className="text-sm text-[var(--color-muted)]">
+          <div className="card p-4">
+            <div className="grid gap-3 md:grid-cols-[1fr_200px]">
+              <label className="label">
                 Search tools
                 <input
                   value={toolSearch}
                   onChange={(event) => setToolSearch(event.target.value)}
                   placeholder="Search by name, category, or slug"
-                  className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                  className="field"
                 />
               </label>
-              <label className="text-sm text-[var(--color-muted)]">
+              <label className="label">
                 Status filter
                 <select
                   value={toolStatusFilter}
                   onChange={(event) => setToolStatusFilter(event.target.value as ToolStatusFilter)}
-                  className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                  className="field"
                 >
                   <option value="all">All</option>
                   <option value="draft">Draft</option>
@@ -452,34 +464,34 @@ export function AdminDashboardClient() {
                 </select>
               </label>
             </div>
-            <p className="mt-2 text-xs text-[var(--color-muted)]">
+            <p className="mt-2 text-xs text-[var(--color-faint)]">
               Showing {filteredTools.length} of {allTools.length} tools loaded.
             </p>
           </div>
 
           <div className="mt-4 space-y-3">
             {filteredTools.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-muted)]">No tools match this filter.</p>
+              <p className="rounded-xl border border-dashed border-[var(--color-line)] p-6 text-center text-sm text-[var(--color-muted)]">No tools match this filter.</p>
             ) : (
               filteredTools.map((tool) => (
-                <article key={tool.id} className="premium-panel rounded-2xl p-4">
+                <article key={tool.id} className="card p-4 sm:p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-[var(--color-muted)]">
-                        {tool.category} | updated {formatDate(tool.updated_at)}
+                    <div className="min-w-0">
+                      <p className="overline">
+                        {tool.category} · updated {formatDate(tool.updated_at)}
                       </p>
                       <h3 className="text-base font-bold text-[var(--color-ink)]">{tool.name}</h3>
-                      <p className="mt-1 text-xs text-[var(--color-muted)]">{tool.slug}</p>
+                      <p className="mt-0.5 font-mono text-xs text-[var(--color-faint)]">{tool.slug}</p>
                     </div>
                     <StatusPill status={tool.status} />
                   </div>
 
                   <p className="mt-2 text-sm text-[var(--color-muted)]">{tool.short_description}</p>
-                  <div className="mt-2 flex flex-wrap gap-2 text-xs text-[var(--color-muted)]">
-                    <span>Rating {tool.avg_rating.toFixed(1)}</span>
-                    <span>Reviews {tool.review_count}</span>
-                    <span>Clicks {tool.click_count}</span>
-                    <span>{tool.is_verified ? "Verified" : "Not verified"}</span>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span className="chip">★ {tool.avg_rating.toFixed(1)}</span>
+                    <span className="chip">{tool.review_count} reviews</span>
+                    <span className="chip">{tool.click_count} clicks</span>
+                    <span className={`chip ${tool.is_verified ? "text-[var(--color-success)]" : ""}`}>{tool.is_verified ? "Verified" : "Not verified"}</span>
                   </div>
 
                   <textarea
@@ -487,36 +499,20 @@ export function AdminDashboardClient() {
                     placeholder="Internal moderation note"
                     value={noteById[tool.id] ?? tool.moderation_notes ?? ""}
                     onChange={(event) => setNoteById((current) => ({ ...current, [tool.id]: event.target.value }))}
-                    className="mt-3 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                    className="field mt-3"
                   />
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => updateToolStatus(tool.id, "pending")}
-                      className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-ink)]"
-                    >
+                    <button type="button" onClick={() => updateToolStatus(tool.id, "pending")} className="btn btn-ghost btn-sm">
                       Mark Pending
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => updateToolStatus(tool.id, "published")}
-                      className="rounded-full bg-[var(--color-success)] px-3 py-1.5 text-xs font-semibold text-white"
-                    >
+                    <button type="button" onClick={() => updateToolStatus(tool.id, "published")} className="btn btn-success btn-sm">
                       Publish
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => updateToolStatus(tool.id, "rejected")}
-                      className="rounded-full bg-[var(--color-danger)] px-3 py-1.5 text-xs font-semibold text-white"
-                    >
+                    <button type="button" onClick={() => updateToolStatus(tool.id, "rejected")} className="btn btn-danger btn-sm">
                       Reject
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => toggleToolVerification(tool.id, !tool.is_verified)}
-                      className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-ink)]"
-                    >
+                    <button type="button" onClick={() => toggleToolVerification(tool.id, !tool.is_verified)} className="btn btn-ghost btn-sm">
                       {tool.is_verified ? "Unverify" : "Verify"}
                     </button>
                   </div>
@@ -528,85 +524,77 @@ export function AdminDashboardClient() {
       ) : null}
 
       {activeTab === "resources" ? (
-        <section className="mt-6 grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <form onSubmit={createResource} className="premium-panel rounded-2xl p-4">
+        <section className="mt-6 grid gap-5 lg:grid-cols-2">
+          <form onSubmit={createResource} className="card p-5">
             <h2 className="text-lg font-bold text-[var(--color-ink)]">Add Platform Resource</h2>
-            <div className="mt-3 space-y-3">
-              <label className="block text-sm text-[var(--color-muted)]">
+            <div className="mt-4 space-y-3">
+              <label className="label">
                 Name
                 <input
                   value={resourceForm.name}
                   onChange={(event) => setResourceForm((current) => ({ ...current, name: event.target.value }))}
-                  className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                  className="field"
                 />
               </label>
-              <label className="block text-sm text-[var(--color-muted)]">
+              <label className="label">
                 URL
                 <input
                   value={resourceForm.url}
                   onChange={(event) => setResourceForm((current) => ({ ...current, url: event.target.value }))}
-                  className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                  className="field"
                 />
               </label>
-              <label className="block text-sm text-[var(--color-muted)]">
+              <label className="label">
                 Category
                 <input
                   value={resourceForm.category}
                   onChange={(event) => setResourceForm((current) => ({ ...current, category: event.target.value }))}
-                  className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                  className="field"
                 />
               </label>
-              <label className="block text-sm text-[var(--color-muted)]">
+              <label className="label">
                 Short Description
                 <textarea
                   rows={3}
                   value={resourceForm.shortDescription}
                   onChange={(event) => setResourceForm((current) => ({ ...current, shortDescription: event.target.value }))}
-                  className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                  className="field"
                 />
               </label>
-              <label className="block text-sm text-[var(--color-muted)]">
+              <label className="label">
                 Free Details
                 <textarea
                   rows={2}
                   value={resourceForm.freeDetails}
                   onChange={(event) => setResourceForm((current) => ({ ...current, freeDetails: event.target.value }))}
-                  className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm"
+                  className="field"
                 />
               </label>
             </div>
-            <button
-              type="submit"
-              disabled={isSavingResource}
-              className="mt-4 rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-[var(--color-paper)] disabled:opacity-60"
-            >
+            <button type="submit" disabled={isSavingResource} className="btn btn-primary btn-md mt-4">
               {isSavingResource ? "Saving..." : "Add Resource"}
             </button>
           </form>
 
-          <section className="premium-panel rounded-2xl p-4">
+          <section className="card p-5">
             <h2 className="text-lg font-bold text-[var(--color-ink)]">Manage Resources</h2>
-            <div className="mt-3 space-y-3">
+            <div className="mt-4 space-y-3">
               {resources.length === 0 ? (
-                <p className="text-sm text-[var(--color-muted)]">No resources available.</p>
+                <p className="rounded-xl border border-dashed border-[var(--color-line)] p-6 text-center text-sm text-[var(--color-muted)]">No resources available.</p>
               ) : (
                 resources.map((resource) => (
-                  <article key={resource.id} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3">
+                  <article key={resource.id} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-3">
                     <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-[var(--color-muted)]">{resource.category}</p>
+                      <div className="min-w-0">
+                        <p className="overline">{resource.category}</p>
                         <p className="text-sm font-semibold text-[var(--color-ink)]">{resource.name}</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => deleteResource(resource.id)}
-                        className="rounded-full border border-[var(--color-line)] px-3 py-1 text-xs font-semibold text-[var(--color-danger)]"
-                      >
+                      <button type="button" onClick={() => deleteResource(resource.id)} className="btn btn-ghost btn-sm text-[var(--color-danger)]">
                         Delete
                       </button>
                     </div>
-                    <p className="mt-1 text-xs text-[var(--color-muted)]">{resource.short_description}</p>
-                    <a href={resource.url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-semibold text-[var(--color-accent)]">
+                    <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">{resource.short_description}</p>
+                    <a href={resource.url} target="_blank" rel="noreferrer" className="mt-2 inline-block break-all text-xs font-semibold text-[var(--color-ink)] underline underline-offset-4">
                       {resource.url}
                     </a>
                   </article>
@@ -622,38 +610,22 @@ export function AdminDashboardClient() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="premium-panel rounded-xl p-4">
-      <p className="text-xs uppercase tracking-wide text-[var(--color-muted)]">{label}</p>
-      <p className="mt-1 text-2xl font-black text-[var(--color-ink)]">{value}</p>
+    <div className="card p-4">
+      <p className="overline">{label}</p>
+      <p className="mt-1 text-2xl font-black tracking-tight text-[var(--color-ink)]">{value}</p>
     </div>
-  );
-}
-
-function TabButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full border px-4 py-2 text-xs font-semibold transition sm:text-sm ${
-        active
-          ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
-          : "border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:bg-[var(--color-surface-2)]"
-      }`}
-    >
-      {label}
-    </button>
   );
 }
 
 function StatusPill({ status }: { status: ToolStatus }) {
   const statusClass =
     status === "published"
-      ? "bg-[var(--color-accent-soft)] text-[var(--color-accent)]"
+      ? "pill-success"
       : status === "pending"
-        ? "bg-[var(--color-surface-2)] text-[var(--color-muted)]"
+        ? "pill-neutral"
         : status === "rejected"
-          ? "bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
-          : "bg-[var(--color-surface-2)] text-[var(--color-muted)]";
+          ? "pill-danger"
+          : "pill-neutral";
 
-  return <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${statusClass}`}>{status}</span>;
+  return <span className={`pill ${statusClass}`}>{status}</span>;
 }

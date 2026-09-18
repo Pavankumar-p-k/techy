@@ -16,5 +16,5 @@ export function getToolLogoUrl(logoUrl: string | null, toolUrl: string): string 
     return null;
   }
 
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=128`;
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=256`;
 }

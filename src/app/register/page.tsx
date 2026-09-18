@@ -41,6 +41,7 @@ export default function RegisterPage() {
         id: data.user.id,
         email: email.trim(),
         full_name: fullName.trim() || null,
+        username: email.trim().split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "_").slice(0, 20) + Math.floor(Math.random() * 90 + 10),
       });
     }
 
@@ -50,63 +51,67 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-10 md:px-6">
-      <section className="premium-panel rounded-2xl p-6">
-        <h1 className="section-title text-2xl font-black">Create Account</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">Join and start saving/reviewing tools.</p>
+    <div className="container-app flex justify-center py-10 md:py-16">
+      <div className="card w-full max-w-md p-6 sm:p-8 fade-in-up">
+        <h1 className="section-title text-2xl font-black tracking-tight">Create Account</h1>
+        <p className="mt-1 text-sm text-[var(--color-muted)]">Join and start saving and reviewing tools.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <label className="block text-sm text-[var(--color-muted)]">
+          <label className="label">
             Full name
             <input
               required
+              autoComplete="name"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
+              className="field"
             />
           </label>
 
-          <label className="block text-sm text-[var(--color-muted)]">
+          <label className="label">
             Email
             <input
               type="email"
               required
+              autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
+              className="field"
             />
           </label>
 
-          <label className="block text-sm text-[var(--color-muted)]">
+          <label className="label">
             Password
             <input
               type="password"
-              minLength={6}
               required
+              minLength={6}
+              autoComplete="new-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2"
+              className="field"
             />
+            <span className="mt-1 block text-xs font-normal text-[var(--color-faint)]">At least 6 characters.</span>
           </label>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full rounded-full bg-[var(--color-accent)] px-5 py-2 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-60"
-          >
+          <button type="submit" disabled={isSubmitting} className="btn btn-accent btn-lg w-full">
             {isSubmitting ? "Creating account..." : "Create account"}
           </button>
         </form>
 
-        {message ? <p className="mt-4 text-sm text-[var(--color-muted)]">{message}</p> : null}
+        {message ? (
+          <p className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-muted)]">
+            {message}
+          </p>
+        ) : null}
 
-        <p className="mt-4 text-sm text-[var(--color-muted)]">
+        <p className="mt-5 text-sm text-[var(--color-muted)]">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-[var(--color-accent)]">
+          <Link href="/login" className="font-semibold text-[var(--color-ink)] underline underline-offset-4">
             Login
           </Link>
         </p>
-      </section>
+      </div>
     </div>
   );
 }

@@ -257,138 +257,143 @@ export function ToolDetailClient({ slug }: ToolDetailClientProps) {
   }
 
   if (loading || authLoading) {
-    return <p className="mx-auto w-full max-w-5xl px-4 py-10 text-sm text-[var(--color-muted)] md:px-6">Loading tool...</p>;
+    return (
+      <div className="container-app py-10">
+        <div className="card p-6">
+          <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
+            <div className="skeleton h-48 w-full rounded-2xl" />
+            <div>
+              <div className="skeleton h-4 w-24" />
+              <div className="skeleton mt-3 h-8 w-2/3" />
+              <div className="skeleton mt-3 h-4 w-full" />
+              <div className="skeleton mt-2 h-4 w-3/4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!tool) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
-        <p className="rounded-xl bg-[var(--color-danger-soft)] p-4 text-sm text-[var(--color-danger)]">{error ?? "Tool not found."}</p>
-        <Link href="/" className="mt-4 inline-block rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-[var(--color-paper)]">
-          Back to Home
-        </Link>
+      <div className="container-app py-10">
+        <div className="card p-6">
+          <p className="rounded-xl bg-[var(--color-danger-soft)] p-4 text-sm text-[var(--color-danger)]">{error ?? "Tool not found."}</p>
+          <Link href="/" className="btn btn-primary btn-md mt-4">
+            Back to Home
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
-      <div className="premium-panel rounded-2xl p-4 sm:p-6">
-        <div className="grid gap-5 lg:grid-cols-[210px_1fr]">
-          <div className="overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)]">
+    <div className="container-app py-6 md:py-10">
+      {/* Hero card */}
+      <div className="card overflow-hidden fade-in-up">
+        <div className="grid gap-0 lg:grid-cols-[240px_1fr]">
+          {/* Logo panel */}
+          <div className="relative grid place-items-center border-b border-[var(--color-line)] bg-gradient-to-br from-[var(--color-surface-2)] to-[var(--color-accent-soft)] p-6 lg:min-h-[240px] lg:border-b-0 lg:border-r">
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt={`${tool.name} logo`} className="h-44 w-full object-cover sm:h-52" />
+              <img
+                src={logoUrl}
+                alt={`${tool.name} logo`}
+                className="h-24 w-24 rounded-3xl bg-white object-contain p-2 shadow-[var(--shadow-soft)] ring-1 ring-[var(--color-line)] sm:h-28 sm:w-28"
+              />
             ) : (
-              <div className="grid h-44 place-items-center bg-gradient-to-br from-[var(--color-accent-soft)] to-[var(--color-surface)] sm:h-52">
-                <span className="rounded-2xl bg-[var(--color-surface)] px-5 py-4 text-3xl font-black text-[var(--color-ink)] sm:rounded-3xl sm:px-6 sm:py-5 sm:text-4xl">
-                  {getInitials(tool.name)}
-                </span>
-              </div>
+              <span className="grid h-24 w-24 place-items-center rounded-3xl bg-[var(--color-ink)] text-2xl font-black text-[var(--color-paper)] sm:h-28 sm:w-28">
+                {getInitials(tool.name)}
+              </span>
             )}
           </div>
 
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">{tool.category}</p>
-            <h1 className="section-title text-2xl font-black sm:text-3xl">{tool.name}</h1>
+          {/* Info panel */}
+          <div className="p-5 sm:p-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="pill pill-accent">{tool.category}</span>
+              <span className="pill pill-neutral">{FREE_TYPE_LABELS[tool.free_type]}</span>
+              {tool.is_verified ? <span className="pill pill-success">Verified</span> : null}
+            </div>
+
+            <h1 className="section-title mt-3 text-2xl font-black tracking-tight sm:text-3xl">{tool.name}</h1>
             <p className="mt-2 text-sm leading-6 text-[var(--color-muted)] sm:text-base sm:leading-7">{tool.short_description}</p>
 
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-4 flex items-center gap-2">
+              <RatingStars value={tool.avg_rating} size="sm" />
+              <span className="text-xs font-semibold text-[var(--color-ink)]">{tool.avg_rating.toFixed(1)}</span>
+              <span className="text-xs text-[var(--color-faint)]">({tool.review_count} reviews)</span>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-1.5">
               {tool.tags.map((tag) => (
-                <span key={tag} className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-2 py-1 text-[11px] text-[var(--color-muted)] sm:text-xs">
+                <span key={tag} className="chip px-2 py-0.5 text-[11px]">
                   #{tag}
                 </span>
               ))}
             </div>
 
-            <div className="mt-4 grid gap-2 sm:grid-cols-2 sm:gap-3">
+            <div className="mt-5 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
               <InfoCard label="Free model" value={FREE_TYPE_LABELS[tool.free_type]} />
-              <InfoCard label="Community rating" value={`${tool.avg_rating.toFixed(1)} / 5 (${tool.review_count} reviews)`} />
-              <InfoCard label="Last updated" value={formatDate(tool.updated_at)} />
+              <InfoCard label="Rating" value={`${tool.avg_rating.toFixed(1)} / 5`} />
+              <InfoCard label="Updated" value={formatDate(tool.updated_at)} />
               <InfoCard label="Clicks" value={tool.click_count.toString()} />
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button type="button" onClick={openTool} className="btn btn-accent btn-md">
+                Visit Website ↗
+              </button>
+              <button type="button" onClick={toggleBookmark} className="btn btn-ghost btn-md">
+                {isBookmarked ? "★ Saved" : "☆ Save"}
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={openTool}
-            className="rounded-full bg-[var(--color-accent)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95 sm:px-5 sm:text-sm"
-          >
-            Visit Official Website
-          </button>
-          <button
-            type="button"
-            onClick={toggleBookmark}
-            className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-2 text-xs font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-surface-2)] sm:px-5 sm:text-sm"
-          >
-            {isBookmarked ? "Remove Bookmark" : "Save Bookmark"}
-          </button>
+      {/* Tabs */}
+      <div className="mt-6 overflow-x-auto pb-1">
+        <div className="flex gap-2">
+          <PanelTab label="Overview" active={activePanel === "overview"} onClick={() => setActivePanel("overview")} />
+          <PanelTab label="Setup Guide" active={activePanel === "setup"} onClick={() => setActivePanel("setup")} />
+          <PanelTab label="Share" active={activePanel === "share"} onClick={() => setActivePanel("share")} />
+          <PanelTab label="Write Review" active={activePanel === "review"} onClick={() => setActivePanel("review")} />
+          <PanelTab label="Community" active={activePanel === "community"} onClick={() => setActivePanel("community")} />
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2 overflow-x-auto">
-        <PanelTab label="Overview" active={activePanel === "overview"} onClick={() => setActivePanel("overview")} />
-        <PanelTab label="Setup Guide" active={activePanel === "setup"} onClick={() => setActivePanel("setup")} />
-        <PanelTab label="Share" active={activePanel === "share"} onClick={() => setActivePanel("share")} />
-        <PanelTab label="Write Review" active={activePanel === "review"} onClick={() => setActivePanel("review")} />
-        <PanelTab label="Community" active={activePanel === "community"} onClick={() => setActivePanel("community")} />
-      </div>
-
       {activePanel === "overview" ? (
-        <section className="premium-panel mt-4 rounded-2xl p-4 sm:p-6">
+        <section className="card mt-4 p-5 sm:p-6 fade-in-up">
           <h2 className="text-lg font-bold text-[var(--color-ink)]">How it works and why it is useful</h2>
           <p className="mt-2 whitespace-pre-line text-sm leading-7 text-[var(--color-muted)]">{tool.how_it_works}</p>
-          <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
-            <span className="font-semibold text-[var(--color-ink)]">Free access summary:</span> {tool.free_details}
+          <p className="mt-4 rounded-xl bg-[var(--color-surface-2)] p-4 text-sm leading-7 text-[var(--color-muted)]">
+            <span className="font-semibold text-[var(--color-ink)]">Free access summary: </span>
+            {tool.free_details}
           </p>
         </section>
       ) : null}
 
       {activePanel === "share" ? (
-        <section className="premium-panel mt-4 rounded-2xl p-4 sm:p-6">
+        <section className="card mt-4 p-5 sm:p-6 fade-in-up">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-bold text-[var(--color-ink)]">Share this tool page</h2>
-            <button
-              type="button"
-              onClick={shareTool}
-              className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-surface-2)]"
-            >
+            <button type="button" onClick={shareTool} className="btn btn-primary btn-sm">
               Share from phone
             </button>
           </div>
           <p className="mt-2 text-sm text-[var(--color-muted)]">Shared links open this website first, then users can go to the official tool link.</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <a
-              href={`https://wa.me/?text=${encodedShareText}`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-ink)]"
-            >
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a href={`https://wa.me/?text=${encodedShareText}`} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
               WhatsApp
             </a>
-            <a
-              href={`https://t.me/share/url?url=${encodedShareUrl}&text=${encodeURIComponent(shareText)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-ink)]"
-            >
+            <a href={`https://t.me/share/url?url=${encodedShareUrl}&text=${encodeURIComponent(shareText)}`} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
               Telegram
             </a>
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodedShareText}`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-ink)]"
-            >
+            <a href={`https://twitter.com/intent/tweet?text=${encodedShareText}`} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
               X
             </a>
-            <button
-              type="button"
-              onClick={copyShareLink}
-              className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-ink)]"
-            >
+            <button type="button" onClick={copyShareLink} className="btn btn-ghost btn-sm">
               Copy link
             </button>
           </div>
@@ -397,16 +402,12 @@ export function ToolDetailClient({ slug }: ToolDetailClientProps) {
       ) : null}
 
       {activePanel === "setup" ? (
-        <section className="premium-panel mt-4 rounded-2xl p-4 sm:p-6">
+        <section className="card mt-4 p-5 sm:p-6 fade-in-up">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-bold text-[var(--color-ink)]">Setup guide (free access)</h2>
             <div className="flex flex-wrap gap-2">
-              {guide?.requires_login ? (
-                <span className="rounded-full bg-[var(--color-surface-2)] px-2 py-1 text-xs font-semibold text-[var(--color-muted)]">Login required</span>
-              ) : null}
-              {guide?.requires_api_key ? (
-                <span className="rounded-full bg-[var(--color-surface-2)] px-2 py-1 text-xs font-semibold text-[var(--color-muted)]">API key setup</span>
-              ) : null}
+              {guide?.requires_login ? <span className="pill pill-neutral">Login required</span> : null}
+              {guide?.requires_api_key ? <span className="pill pill-neutral">API key setup</span> : null}
             </div>
           </div>
 
@@ -414,25 +415,31 @@ export function ToolDetailClient({ slug }: ToolDetailClientProps) {
           {guide?.free_access_notes ? <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">{guide.free_access_notes}</p> : null}
 
           {guideSteps.length > 0 ? (
-            <div className="mt-4 space-y-3">
-              {guideSteps.map((step) => (
-                <article key={step.id} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Step {step.step_order}</p>
-                  <h3 className="mt-1 text-sm font-bold text-[var(--color-ink)]">{step.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{step.description}</p>
+            <ol className="mt-5 space-y-3">
+              {guideSteps.map((step, index) => (
+                <li key={step.id} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--color-ink)] text-xs font-bold text-[var(--color-paper)]">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-[var(--color-ink)]">{step.title}</h3>
+                      <p className="mt-1.5 text-sm leading-6 text-[var(--color-muted)]">{step.description}</p>
+                    </div>
+                  </div>
                   {step.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={step.image_url} alt={`${step.title} screenshot`} className="mt-3 max-h-64 w-full rounded-xl border border-[var(--color-line)] object-cover" />
+                    <img src={step.image_url} alt={`${step.title} screenshot`} className="mt-3 max-h-64 w-full rounded-xl border border-[var(--color-line)] object-cover" loading="lazy" />
                   ) : null}
-                </article>
+                </li>
               ))}
-            </div>
+            </ol>
           ) : fallbackSteps.length > 0 ? (
             <div className="mt-4 space-y-2">
               {fallbackSteps.map((line) => (
-                <article key={line} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-muted)]">
+                <p key={line} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-3 text-sm text-[var(--color-muted)]">
                   {line}
-                </article>
+                </p>
               ))}
             </div>
           ) : (
@@ -442,59 +449,62 @@ export function ToolDetailClient({ slug }: ToolDetailClientProps) {
       ) : null}
 
       {activePanel === "review" ? (
-        <section className="premium-panel mt-4 rounded-2xl p-4 sm:p-6">
+        <section className="card mt-4 p-5 sm:p-6 fade-in-up">
           <h2 className="text-xl font-bold text-[var(--color-ink)]">Rate this tool</h2>
           <form onSubmit={handleReviewSubmit} className="mt-4 space-y-4">
             <div>
-              <p className="mb-2 text-sm text-[var(--color-muted)]">Your rating</p>
-              <RatingStars value={rating} onChange={setRating} />
+              <p className="label">Your rating</p>
+              <div className="mt-2">
+                <RatingStars value={rating} onChange={setRating} size="lg" />
+              </div>
             </div>
-            <label className="block text-sm text-[var(--color-muted)]">
+            <label className="label">
               Review (optional)
               <textarea
                 value={reviewText}
                 onChange={(event) => setReviewText(event.target.value)}
                 rows={4}
                 placeholder="What was useful? Any free-tier limits?"
-                className="mt-1 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-2 text-[var(--color-ink)] outline-none transition focus:border-[var(--color-accent)]"
+                className="field mt-1"
               />
             </label>
-            <button
-              type="submit"
-              disabled={submittingReview}
-              className="rounded-full bg-[var(--color-ink)] px-5 py-2 text-sm font-semibold text-[var(--color-paper)] transition hover:bg-[var(--color-accent)] disabled:opacity-60"
-            >
+            <button type="submit" disabled={submittingReview} className="btn btn-primary btn-md">
               {submittingReview ? "Saving..." : "Submit Review"}
             </button>
           </form>
+          {error ? (
+            <p className="mt-4 rounded-xl bg-[var(--color-danger-soft)] p-3 text-sm text-[var(--color-danger)]">{error}</p>
+          ) : null}
         </section>
       ) : null}
 
       {activePanel === "community" ? (
-        <section className="premium-panel mt-4 rounded-2xl p-4 sm:p-6">
+        <section className="card mt-4 p-5 sm:p-6 fade-in-up">
           <h2 className="text-xl font-bold text-[var(--color-ink)]">Community reviews</h2>
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-3">
             {reviews.length === 0 ? (
-              <p className="text-sm text-[var(--color-muted)]">No reviews yet.</p>
+              <p className="rounded-xl border border-dashed border-[var(--color-line)] p-4 text-sm text-[var(--color-muted)]">No reviews yet. Be the first to review.</p>
             ) : (
               reviews.map((review) => (
-                <article key={review.id} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
+                <article key={review.id} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-4">
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
                       {review.profiles?.avatar_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={review.profiles.avatar_url} alt="Reviewer avatar" className="h-8 w-8 rounded-full border border-[var(--color-line)] object-cover" />
                       ) : (
-                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--color-surface-2)] text-xs font-bold text-[var(--color-ink)]">
+                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--color-ink)] text-xs font-bold text-[var(--color-paper)]">
                           {getInitials(review.profiles?.full_name ?? "U")}
                         </span>
                       )}
-                      <p className="text-sm font-semibold text-[var(--color-ink)]">{review.profiles?.full_name ?? "Anonymous"}</p>
+                      <div>
+                        <p className="text-sm font-semibold text-[var(--color-ink)]">{review.profiles?.full_name ?? "Anonymous"}</p>
+                        <p className="text-[11px] text-[var(--color-faint)]">{formatDate(review.created_at)}</p>
+                      </div>
                     </div>
-                    <p className="text-xs text-[var(--color-muted)]">{formatDate(review.created_at)}</p>
+                    <RatingStars value={review.rating} size="sm" />
                   </div>
-                  <RatingStars value={review.rating} size="sm" />
-                  {review.review_text ? <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{review.review_text}</p> : null}
+                  {review.review_text ? <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">{review.review_text}</p> : null}
                 </article>
               ))
             )}
@@ -507,9 +517,9 @@ export function ToolDetailClient({ slug }: ToolDetailClientProps) {
 
 function InfoCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-3">
-      <p className="text-xs uppercase tracking-wide text-[var(--color-muted)]">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-[var(--color-ink)]">{value}</p>
+    <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-3">
+      <p className="overline">{label}</p>
+      <p className="mt-1 text-xs font-semibold text-[var(--color-ink)] sm:text-sm">{value}</p>
     </div>
   );
 }
@@ -519,10 +529,10 @@ function PanelTab({ label, active, onClick }: { label: string; active: boolean; 
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-4 py-2 text-xs font-semibold transition sm:text-sm ${
+      className={`whitespace-nowrap rounded-full border px-4 py-2 text-xs font-semibold transition sm:text-sm ${
         active
           ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
-          : "border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:bg-[var(--color-surface-2)]"
+          : "border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-ink)]"
       }`}
     >
       {label}

@@ -3,27 +3,18 @@
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "sth-ui-theme";
-const THEMES = [
-  { value: "forest", label: "Forest" },
-  { value: "dark", label: "Dark" },
-] as const;
-
-type ThemeValue = (typeof THEMES)[number]["value"];
+type ThemeValue = "light" | "dark";
 
 function getInitialTheme(): ThemeValue {
   if (typeof window === "undefined") {
-    return "forest";
+    return "light";
   }
 
   const saved = window.localStorage.getItem(STORAGE_KEY);
-  if (saved === "midnight") {
-    return "dark";
-  }
-  const isValid = THEMES.some((item) => item.value === saved);
-  return isValid ? (saved as ThemeValue) : "forest";
+  return saved === "dark" ? "dark" : "light";
 }
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
   const [theme, setTheme] = useState<ThemeValue>(getInitialTheme);
 
   useEffect(() => {
@@ -31,21 +22,41 @@ export function ThemeSwitcher() {
     window.localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
-  return (
-    <label className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-muted)]">
-      Theme
-      <select
-        value={theme}
-        onChange={(event) => setTheme(event.target.value as ThemeValue)}
-        className="rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-2 py-1 text-xs text-[var(--color-ink)]"
-        aria-label="Select theme"
+  function toggleTheme() {
+    setTheme((current) => (current === "light" ? "dark" : "light"));
+  }
+
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="btn btn-ghost btn-sm"
+        aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+        title={theme === "light" ? "Dark theme" : "Light theme"}
       >
-        {THEMES.map((item) => (
-          <option key={item.value} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
-    </label>
+        {theme === "light" ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41" />
+          </svg>
+        )}
+      </button>
+    );
+  }
+
+  return (
+    <div className="segmented" role="group" aria-label="Theme selection">
+      <button type="button" data-active={theme === "light"} onClick={() => setTheme("light")}>
+        Light
+      </button>
+      <button type="button" data-active={theme === "dark"} onClick={() => setTheme("dark")}>
+        Dark
+      </button>
+    </div>
   );
 }
