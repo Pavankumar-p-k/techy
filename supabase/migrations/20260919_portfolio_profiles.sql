@@ -2,6 +2,10 @@
 -- Auto Portfolio Profile migration
 -- Adds portfolio configuration to profiles + storage bucket.
 -- Existing tables/columns are NOT touched.
+--
+-- ▶▶▶ RUN THIS IN SUPABASE SQL EDITOR ◀◀◀
+-- Portfolio rendering WILL NOT WORK until this is executed
+-- (error: "column profiles.portfolio_enabled does not exist").
 -- ============================================================
 
 -- 1. Profile columns
