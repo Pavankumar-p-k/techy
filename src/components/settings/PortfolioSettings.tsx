@@ -34,8 +34,18 @@ export function PortfolioSettings({ username }: { username: string }) {
   const [zipPath, setZipPath] = useState(profile?.portfolio_storage_path ?? "");
   const [zipFileName, setZipFileName] = useState<string | null>(null);
 
+  interface ExternalValidation {
+    urlValid: boolean;
+    https: boolean;
+    reachable: boolean;
+    embedding: "allowed" | "blocked" | "unknown";
+    message: string;
+  }
+
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [validation, setValidation] = useState<ExternalValidation | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
@@ -58,13 +68,44 @@ export function PortfolioSettings({ username }: { username: string }) {
   function validateExternalUrl(value: string): string | null {
     try {
       const parsed = new URL(value);
-      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-        return "URL must start with http:// or https://";
+      if (parsed.protocol !== "https:") {
+        return "URL must use HTTPS (https://).";
       }
       return null;
     } catch {
       return "Enter a valid URL.";
     }
+  }
+
+  // Server-side check: HTTPS, reachability, embedding headers.
+  // A blocked embedding is a WARNING, not a save-blocker — the renderer
+  // falls back to an "Open Portfolio" button in that case.
+  async function handleValidateExternalUrl() {
+    const urlError = validateExternalUrl(externalUrl);
+    if (urlError) {
+      setMessage(urlError);
+      setIsSuccess(false);
+      setValidation(null);
+      return;
+    }
+
+    setIsValidating(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch("/api/portfolio/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: externalUrl.trim() }),
+      });
+      const result = (await response.json()) as ExternalValidation;
+      setValidation(result);
+    } catch {
+      setMessage("Validation request failed. Check your connection and try again.");
+      setIsSuccess(false);
+    }
+
+    setIsValidating(false);
   }
 
   async function handleZipUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -195,6 +236,8 @@ export function PortfolioSettings({ username }: { username: string }) {
           setMessage(urlError);
           return;
         }
+        // Embedding must be allowed OR acknowledged via validation warning —
+        // but a blocked site is still saveable (fallback handles it), so no block here.
       }
     }
 
@@ -344,22 +387,65 @@ export function PortfolioSettings({ username }: { username: string }) {
           </div>
         ) : null}
 
-        {/* External URL */}
+        {/* External URL — any HTTPS deployment (Vercel, Netlify, GitHub Pages, pages.dev, custom domains…) */}
         {portfolioType === "external" ? (
           <div className="mt-4">
             <label className="label">
-              Portfolio URL
-              <input
-                type="url"
-                value={externalUrl}
-                onChange={(event) => setExternalUrl(event.target.value)}
-                placeholder="https://your-portfolio.vercel.app"
-                className="field"
-              />
+              Live website URL (HTTPS)
+              <div className="mt-1 flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="url"
+                  value={externalUrl}
+                  onChange={(event) => {
+                    setExternalUrl(event.target.value);
+                    setValidation(null);
+                  }}
+                  placeholder="https://your-portfolio.vercel.app"
+                  className="field"
+                />
+                <button
+                  type="button"
+                  onClick={handleValidateExternalUrl}
+                  disabled={isValidating || !externalUrl.trim()}
+                  className="btn btn-ghost btn-md shrink-0"
+                >
+                  {isValidating ? "Checking..." : "Validate"}
+                </button>
+              </div>
             </label>
             <p className="mt-1 text-xs text-[var(--color-faint)]">
-              If the site blocks embedding, visitors get a one-click &quot;Open Portfolio&quot; fallback.
+              Works with any deployed frontend — React, Next.js, Vue, plain HTML — hosted anywhere. Your backend and
+              database stay on your own hosting.
             </p>
+
+            {validation ? (
+              <ul className="mt-3 space-y-1 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-3 text-xs">
+                <li className={validation.https ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}>
+                  {validation.https ? "✓" : "✗"} HTTPS
+                </li>
+                <li className={validation.urlValid ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}>
+                  {validation.urlValid ? "✓" : "✗"} URL valid
+                </li>
+                <li className={validation.reachable ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}>
+                  {validation.reachable ? "✓" : "✗"} Website reachable
+                </li>
+                <li
+                  className={
+                    validation.embedding === "blocked"
+                      ? "text-[var(--color-warning, #b45309)]"
+                      : validation.embedding === "allowed"
+                        ? "text-[var(--color-success)]"
+                        : "text-[var(--color-muted)]"
+                  }
+                >
+                  {validation.embedding === "blocked"
+                    ? "⚠ Embedding blocked by website — visitors will get an \u201cOpen Portfolio\u201d button"
+                    : validation.embedding === "allowed"
+                      ? "✓ Embedding supported"
+                      : "• Embedding will be tested live when visitors open your profile"}
+                </li>
+              </ul>
+            ) : null}
           </div>
         ) : null}
       </div>
