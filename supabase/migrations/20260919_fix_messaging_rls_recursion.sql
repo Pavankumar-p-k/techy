@@ -115,11 +115,9 @@ grant select, insert, update, delete on
   public.notifications
 to anon, authenticated;
 
-grant execute on
-  function public.is_conversation_member(uuid),
-  function public.owns_conversation(uuid),
-  function public.follow_user(uuid),
-  function public.unfollow_user(uuid),
-  function public.is_following(uuid),
-  function public.get_or_create_direct_conversation(uuid)
-to anon, authenticated;
+grant execute on function public.is_conversation_member(uuid) to anon, authenticated;
+grant execute on function public.owns_conversation(uuid) to anon, authenticated;
+grant execute on function public.follow_user(uuid) to anon, authenticated;
+grant execute on function public.unfollow_user(uuid) to anon, authenticated;
+grant execute on function public.is_following(uuid) to anon, authenticated;
+grant execute on function public.get_or_create_direct_conversation(uuid) to anon, authenticated;
