@@ -95,10 +95,8 @@ export function ProfilePageClient({ username }: ProfilePageClientProps) {
   // ===== CASE 1: Portfolio configured → live portfolio IS the profile =====
   if (source && !showSocialProfile) {
     return (
-      <div
-        className="fixed inset-x-0 bottom-0 top-14 z-40 flex flex-col bg-[var(--color-paper)] pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:pb-0"
-      >
-        {/* Minimal bar: back + username + social profile link */}
+      <div className="fixed inset-x-0 bottom-0 top-14 z-40 flex flex-col bg-[var(--color-paper)] pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+        {/* Minimal bar: back + username + prominent Social Profile toggle */}
         <div className="flex h-11 shrink-0 items-center gap-3 border-b border-[var(--color-line)] bg-[var(--color-overlay)] px-4 backdrop-blur-xl">
           <button
             type="button"
@@ -111,9 +109,9 @@ export function ProfilePageClient({ username }: ProfilePageClientProps) {
           <button
             type="button"
             onClick={() => setShowSocialProfile(true)}
-            className="text-xs font-semibold text-[var(--color-muted)] underline underline-offset-4 transition hover:text-[var(--color-ink)]"
+            className="rounded-full bg-[var(--color-ink)] px-3.5 py-1.5 text-xs font-bold text-[var(--color-paper)] shadow-sm transition hover:opacity-85"
           >
-            Social Profile
+            👤 Social Profile
           </button>
         </div>
 
