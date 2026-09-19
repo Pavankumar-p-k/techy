@@ -193,26 +193,55 @@ export function ProjectDetailClient({ projectId }: ProjectDetailClientProps) {
 
           <p className="mt-4 whitespace-pre-line text-sm leading-7 text-[var(--color-muted)]">{project.description}</p>
 
-          {/* Links */}
-          {(project.demo_url || project.github_url || project.other_url) && (
-            <div className="mt-5 flex flex-wrap gap-2">
-              {project.demo_url ? (
-                <a href={project.demo_url} target="_blank" rel="noreferrer noopener" className="btn btn-accent btn-md">
-                  Live Demo ↗
+          {/* Live demo: TRY IT (embedded) / VISIT SITE (external) */}
+          {project.demo_url ? (
+            <div className="mt-5">
+              <div className="flex flex-wrap gap-2">
+                <Link href={`/projects/${project.id}/try`} className="btn btn-primary btn-md">
+                  ▶ TRY IT
+                </Link>
+                <a href={project.demo_url} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-md">
+                  ↗ VISIT SITE
                 </a>
-              ) : null}
-              {project.github_url ? (
-                <a href={project.github_url} target="_blank" rel="noreferrer noopener" className="btn btn-ghost btn-md">
-                  GitHub ↗
-                </a>
-              ) : null}
-              {project.other_url ? (
-                <a href={project.other_url} target="_blank" rel="noreferrer noopener" className="btn btn-ghost btn-md">
-                  Link ↗
-                </a>
+              </div>
+              <p className="mt-2 text-xs text-[var(--color-faint)]">
+                ▶ Try it here · ↗ opens the original site in a new tab
+              </p>
+              {project.github_url || project.other_url ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {project.github_url ? (
+                    <a href={project.github_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+                      GitHub ↗
+                    </a>
+                  ) : null}
+                  {project.other_url ? (
+                    <a href={project.other_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+                      Link ↗
+                    </a>
+                  ) : null}
+                </div>
               ) : null}
             </div>
+          ) : (
+            <p className="mt-5 rounded-xl border border-dashed border-[var(--color-line)] px-4 py-3 text-xs text-[var(--color-muted)]">
+              This project does not have a live deployment yet.
+              {project.github_url ? (
+                <>
+                  {" "}
+                  <a href={project.github_url} target="_blank" rel="noopener noreferrer" className="font-semibold text-[var(--color-ink)] underline underline-offset-4">
+                    View the code on GitHub ↗
+                  </a>
+                </>
+              ) : null}
+            </p>
           )}
+          {!project.demo_url && project.other_url ? (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <a href={project.other_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+                Link ↗
+              </a>
+            </div>
+          ) : null}
 
           {/* Tech + tools */}
           {(project.technologies.length > 0 || project.tools_used.length > 0) && (

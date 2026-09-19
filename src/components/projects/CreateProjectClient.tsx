@@ -169,8 +169,11 @@ export function CreateProjectClient() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="label">
-              Live demo URL
-              <input type="url" value={demoUrl} onChange={(event) => setDemoUrl(event.target.value)} placeholder="https://..." className="field" />
+              Live Deployment URL
+              <input type="url" value={demoUrl} onChange={(event) => setDemoUrl(event.target.value)} placeholder="https://my-project.vercel.app" className="field" />
+              <span className="mt-1 block text-[11px] font-normal text-[var(--color-faint)]">
+                Deployed site (Vercel, Netlify, GitHub Pages...) — enables the TRY IT experience
+              </span>
             </label>
             <label className="label">
               GitHub URL
