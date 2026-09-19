@@ -39,20 +39,29 @@ alter table public.projects
   add constraint projects_cover_url_safe
   check (cover_url is null or public.is_safe_http_url(cover_url));
 
--- 5. Screenshot URLs: same http(s)-only safety as other link fields
+-- 5. Screenshot URLs: same http(s)-only safety as other link fields.
+--    NOTE: PostgreSQL forbids subqueries in CHECK constraints, so the
+--    per-element check lives in a helper function instead.
+create or replace function public.are_safe_http_urls(urls text[])
+returns boolean
+language sql
+stable
+as $$
+  select coalesce(
+    not exists (
+      select 1
+      from unnest(urls) as s
+      where s is not null and not public.is_safe_http_url(s)
+    ),
+    true
+  );
+$$;
+
 alter table public.projects
   drop constraint if exists projects_screenshots_safe;
 alter table public.projects
   add constraint projects_screenshots_safe
-  check (screenshots is null or screenshots = '{}' or exists (
-    select 1
-    from unnest(screenshots) as s
-    where public.is_safe_http_url(s)
-  ) and not exists (
-    select 1
-    from unnest(screenshots) as s
-    where not public.is_safe_http_url(s)
-  ));
+  check (screenshots is null or public.are_safe_http_urls(screenshots));
 
 -- 6. Sanity notice if existing rows would violate the new rules
 do $$
