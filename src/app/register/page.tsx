@@ -20,12 +20,17 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     setMessage(null);
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedFullName = fullName.trim();
+    const emailRedirectTo = `${window.location.origin}/login?confirmed=1`;
+
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: normalizedEmail,
       password,
       options: {
+        emailRedirectTo,
         data: {
-          full_name: fullName.trim(),
+          full_name: normalizedFullName,
         },
       },
     });
@@ -36,18 +41,24 @@ export default function RegisterPage() {
       return;
     }
 
-    if (data.user) {
-      await supabase.from("profiles").upsert({
-        id: data.user.id,
-        email: email.trim(),
-        full_name: fullName.trim() || null,
-        username: email.trim().split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "_").slice(0, 20) + Math.floor(Math.random() * 90 + 10),
-      });
+    if (!data.user) {
+      setMessage("We could not create your account. Please try again.");
+      setIsSubmitting(false);
+      return;
     }
 
-    setMessage("Registration successful. Check your email if confirmation is enabled, then login.");
+    // The database trigger creates the profile atomically when auth.users is inserted.
+    // Do not upsert from the browser: with email confirmation enabled there is no
+    // authenticated session yet, so that client-side write is rejected by RLS.
+    if (data.session) {
+      setMessage("Account created. You are now signed in.");
+      setIsSubmitting(false);
+      router.replace("/");
+      return;
+    }
+
+    setMessage("Account created. Check your email and click the confirmation link before logging in.");
     setIsSubmitting(false);
-    setTimeout(() => router.push("/login"), 1200);
   }
 
   return (
