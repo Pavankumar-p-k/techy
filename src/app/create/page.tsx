@@ -1,29 +1,30 @@
 import Link from "next/link";
+import { Award, FileEdit, GraduationCap, Rocket } from "lucide-react";
 
 const CREATE_OPTIONS = [
   {
     href: "/create/post",
     title: "Post",
     description: "Share an update, question, or something you learned.",
-    icon: "✍️",
+    Icon: FileEdit,
   },
   {
     href: "/create/project",
     title: "Project",
     description: "Showcase a project with screenshots, links, and tech stack.",
-    icon: "🚀",
+    Icon: Rocket,
   },
   {
     href: "/create/post?type=achievement",
     title: "Achievement",
     description: "Hackathon wins, certificates, milestones, internships.",
-    icon: "🏆",
+    Icon: Award,
   },
   {
     href: "/create/post?type=course_completion",
     title: "Course Completion",
     description: "Share a completed course with your certificate.",
-    icon: "🎓",
+    Icon: GraduationCap,
   },
 ];
 
@@ -36,10 +37,10 @@ export default function CreatePage() {
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {CREATE_OPTIONS.map((option) => (
           <Link key={option.href} href={option.href} className="card card-hover p-5">
-            <p className="text-2xl" aria-hidden="true">
-              {option.icon}
-            </p>
-            <h2 className="mt-2 text-base font-bold text-[var(--color-ink)]">{option.title}</h2>
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-ink)]">
+              <option.Icon className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <h2 className="mt-3 text-base font-bold text-[var(--color-ink)]">{option.title}</h2>
             <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">{option.description}</p>
           </Link>
         ))}

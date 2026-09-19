@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Award, BookOpen, FileEdit, GraduationCap, Rocket, Wrench } from "lucide-react";
 import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -18,12 +19,12 @@ const PRIMARY_LINKS = [
 ] as const;
 
 const CREATE_OPTIONS = [
-  { href: "/create/post", label: "Post", description: "Share an update", icon: "✍️" },
-  { href: "/create/project", label: "Project", description: "Showcase your work", icon: "🚀" },
-  { href: "/create/post?type=achievement", label: "Achievement", description: "Wins & certificates", icon: "🏆" },
-  { href: "/create/post?type=course_completion", label: "Course Completed", description: "Learning progress", icon: "🎓" },
-  { href: "/submit", label: "Submit Tool", description: "Add a tool you love", icon: "🛠️" },
-  { href: "/submit/resource", label: "Submit Resource", description: "Share a learning resource", icon: "📚" },
+  { href: "/create/post", label: "Post", description: "Share an update", Icon: FileEdit },
+  { href: "/create/project", label: "Project", description: "Showcase your work", Icon: Rocket },
+  { href: "/create/post?type=achievement", label: "Achievement", description: "Wins & certificates", Icon: Award },
+  { href: "/create/post?type=course_completion", label: "Course Completed", description: "Learning progress", Icon: GraduationCap },
+  { href: "/submit", label: "Submit Tool", description: "Add a tool you love", Icon: Wrench },
+  { href: "/create/post?type=course_completion", label: "Submit Resource", description: "Share a learning resource", Icon: BookOpen },
 ];
 
 function NavIcon({ name, className }: { name: string; className: string }) {
@@ -237,7 +238,7 @@ export function SiteHeader() {
                       onClick={() => setIsCreateOpen(false)}
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-[var(--color-surface-2)]"
                     >
-                      <span className="text-xl" aria-hidden="true">{option.icon}</span>
+                      <option.Icon className="h-5 w-5" aria-hidden="true" />
                       <span>
                         <span className="block text-sm font-bold text-[var(--color-ink)]">{option.label}</span>
                         <span className="block text-xs text-[var(--color-faint)]">{option.description}</span>

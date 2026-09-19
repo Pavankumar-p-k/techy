@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { BookOpen, FileEdit, GraduationCap, Rocket, Wrench, type LucideIcon } from "lucide-react";
 import { CategoryDropdown } from "@/components/explore/CategoryDropdown";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { TOOL_CATEGORIES, RESOURCE_CATEGORIES } from "@/lib/constants";
@@ -200,13 +201,13 @@ export function ExploreClient() {
     };
   }, [supabase, debouncedQuery, isSearchMode]);
 
-  const tabs: { key: SearchTab; label: string; icon: string; count: number }[] = useMemo(
+  const tabs: { key: SearchTab; label: string; Icon: LucideIcon; count: number }[] = useMemo(
     () => [
-      { key: "tools", label: "Tools", icon: "🧰", count: tools.length },
-      { key: "resources", label: "Resources", icon: "📚", count: resources.length },
-      { key: "projects", label: "Projects", icon: "🚀", count: projects.length },
-      { key: "students", label: "Students", icon: "🧑‍🎓", count: students.length },
-      { key: "posts", label: "Posts", icon: "📝", count: posts.length },
+      { key: "tools", label: "Tools", Icon: Wrench, count: tools.length },
+      { key: "resources", label: "Resources", Icon: BookOpen, count: resources.length },
+      { key: "projects", label: "Projects", Icon: Rocket, count: projects.length },
+      { key: "students", label: "Students", Icon: GraduationCap, count: students.length },
+      { key: "posts", label: "Posts", Icon: FileEdit, count: posts.length },
     ],
     [tools.length, resources.length, projects.length, students.length, posts.length]
   );
@@ -242,7 +243,7 @@ export function ExploreClient() {
                 : "border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
             }`}
           >
-            <span aria-hidden="true" className="mr-1">{tab.icon}</span>
+            <tab.Icon aria-hidden="true" className="mr-1 h-4 w-4" />
             {tab.label}
             {!isSearchMode ? "" : ` (${tab.count})`}
           </button>

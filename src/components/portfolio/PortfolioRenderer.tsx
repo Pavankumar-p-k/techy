@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Lock } from "lucide-react";
 
 export type PortfolioSource =
   | { kind: "html"; html: string }
@@ -101,7 +102,7 @@ export function PortfolioRenderer({ source, ownerName }: PortfolioRendererProps)
       {iframeBlocked ? (
         <div className="absolute inset-0 grid place-items-center bg-[var(--color-surface)] p-6">
           <div className="card max-w-md p-6 text-center">
-            <p className="text-2xl" aria-hidden="true">🔒</p>
+            <Lock aria-hidden="true" className="mx-auto h-8 w-8 text-[var(--color-muted)]" />
             <p className="mt-2 text-sm font-semibold text-[var(--color-ink)]">
               This website cannot be embedded
             </p>

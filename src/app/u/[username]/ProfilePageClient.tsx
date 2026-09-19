@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ProfileView } from "@/components/social/ProfileView";
 import { PortfolioRenderer, type PortfolioSource } from "@/components/portfolio/PortfolioRenderer";
@@ -111,7 +112,8 @@ export function ProfilePageClient({ username }: ProfilePageClientProps) {
             onClick={() => setShowSocialProfile(true)}
             className="rounded-full bg-[var(--color-ink)] px-3.5 py-1.5 text-xs font-bold text-[var(--color-paper)] shadow-sm transition hover:opacity-85"
           >
-            👤 Social Profile
+            <UserRound aria-hidden="true" className="mr-1.5 inline h-3.5 w-3.5" />
+            Social Profile
           </button>
         </div>
 

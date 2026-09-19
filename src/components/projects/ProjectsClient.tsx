@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { Rocket } from "lucide-react";
 import { CategoryDropdown } from "@/components/explore/CategoryDropdown";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -122,7 +123,7 @@ export function ProjectsClient() {
 
       {!loading && filtered.length === 0 ? (
         <div className="card mt-6 p-10 text-center">
-          <p className="text-3xl" aria-hidden="true">🚀</p>
+          <Rocket aria-hidden="true" className="mx-auto h-10 w-10 text-[var(--color-faint)]" />
           <p className="mt-2 text-sm font-semibold text-[var(--color-ink)]">No projects yet.</p>
           <p className="mt-1 text-sm text-[var(--color-muted)]">Build something and showcase it here.</p>
           {user ? (

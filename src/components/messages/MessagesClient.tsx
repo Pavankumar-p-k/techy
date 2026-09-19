@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { MessageCircle } from "lucide-react";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ConversationListItem, SocialProfile } from "@/lib/types";
@@ -300,7 +301,7 @@ export function MessagesClient() {
       {/* Conversation list */}
       {conversations.length === 0 ? (
         <div className="card mt-5 p-10 text-center">
-          <p className="text-3xl" aria-hidden="true">💬</p>
+          <MessageCircle aria-hidden="true" className="mx-auto h-10 w-10 text-[var(--color-faint)]" />
           <p className="mt-2 text-sm font-semibold text-[var(--color-ink)]">No conversations yet.</p>
           <p className="mt-1 text-sm text-[var(--color-muted)]">Discover students and start a conversation.</p>
           <Link href="/explore" className="btn btn-primary btn-md mt-5">

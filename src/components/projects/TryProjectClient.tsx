@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { Lock } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface TryProjectClientProps {
@@ -143,7 +144,7 @@ export function TryProjectClient({ projectId }: TryProjectClientProps) {
         {iframeBlocked ? (
           <div className="absolute inset-0 grid place-items-center p-6">
             <div className="card max-w-md p-6 text-center">
-              <p className="text-2xl" aria-hidden="true">🔒</p>
+              <Lock aria-hidden="true" className="mx-auto h-8 w-8 text-[var(--color-muted)]" />
               <p className="mt-2 text-sm font-semibold text-[var(--color-ink)]">
                 This project doesn&apos;t allow embedded viewing.
               </p>
