@@ -76,7 +76,7 @@ export function useAuthUser() {
       console.error("Failed to load user profile:", profileError.message);
       setProfile(null);
     } else {
-      setProfile(profileData);
+      setProfile(profileData as Profile);
     }
 
     setLoading(false);
