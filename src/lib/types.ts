@@ -563,8 +563,8 @@ export interface Database {
           id: string;
           owner_id: string;
           title: string;
-          description: string;
-          category: string;
+          description: string | null;
+          category: string | null;
           status: ProjectStatus;
           review_status: ProjectReviewStatus;
           cover_url: string | null;
@@ -581,8 +581,8 @@ export interface Database {
           id?: string;
           owner_id: string;
           title: string;
-          description: string;
-          category?: string;
+          description?: string | null;
+          category?: string | null;
           status?: ProjectStatus;
           review_status?: ProjectReviewStatus;
           cover_url?: string | null;
@@ -599,8 +599,8 @@ export interface Database {
           id?: string;
           owner_id?: string;
           title?: string;
-          description?: string;
-          category?: string;
+          description?: string | null;
+          category?: string | null;
           status?: ProjectStatus;
           review_status?: ProjectReviewStatus;
           cover_url?: string | null;

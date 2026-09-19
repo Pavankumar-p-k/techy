@@ -200,14 +200,16 @@ export const commentInputSchema = z.object({
 
 export const projectInputSchema = z.object({
   title: z.string().trim().min(2, "Project title is required.").max(120, "Title should be under 120 characters."),
-  description: z.string().trim().min(16, "Description should be at least 16 characters.").max(6000, "Description is too long."),
-  category: z.string().trim().min(2).max(40),
+  description: z.string().trim().max(6000, "Description is too long.").optional().or(z.literal("")),
+  category: z.string().trim().max(40).optional(),
   status: z.enum(["planning", "building", "completed", "maintaining", "archived"]),
   coverUrl: z
     .string()
     .trim()
     .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Cover image must be a valid http(s) URL.")
-    .transform((v) => v || null),
+    .transform((v) => v || null)
+    .optional()
+    .nullable(),
   demoUrl: z
     .string()
     .trim()
@@ -225,8 +227,8 @@ export const projectInputSchema = z.object({
     .transform((v) => v || null)
     .optional()
     .nullable(),
-  technologies: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 technologies."),
-  toolsUsed: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 tools."),
+  technologies: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 technologies.").optional(),
+  toolsUsed: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 tools.").optional(),
 });
 
 export const feedbackInputSchema = z.object({

@@ -316,7 +316,7 @@ export function ExploreClient() {
                 <span className="pill pill-neutral">{project.status}</span>
               </div>
               <h3 className="mt-1.5 text-base font-bold text-[var(--color-ink)]">{project.title}</h3>
-              <p className="line-clamp-2 mt-1 flex-1 text-xs leading-5 text-[var(--color-muted)]">{project.description}</p>
+              <p className="line-clamp-2 mt-1 flex-1 text-xs leading-5 text-[var(--color-muted)]">{project.description ?? ""}</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {project.technologies.slice(0, 4).map((tech) => (
                   <span key={tech} className="chip px-2 py-0.5 text-[10px]">{tech}</span>

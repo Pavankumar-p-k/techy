@@ -73,7 +73,7 @@ export function ProjectsClient() {
     return projects.filter(
       (project) =>
         project.title.toLowerCase().includes(term) ||
-        project.description.toLowerCase().includes(term) ||
+        (project.description ?? "").toLowerCase().includes(term) ||
         project.technologies.some((tech) => tech.toLowerCase().includes(term))
     );
   }, [projects, search]);
@@ -151,7 +151,7 @@ export function ProjectsClient() {
                   <span className={`pill ${PROJECT_STATUS_BADGES[project.status]}`}>{project.status}</span>
                 </div>
                 <h3 className="mt-1 text-base font-bold text-[var(--color-ink)]">{project.title}</h3>
-                <p className="line-clamp-2 mt-1 flex-1 text-xs leading-5 text-[var(--color-muted)]">{project.description}</p>
+                <p className="line-clamp-2 mt-1 flex-1 text-xs leading-5 text-[var(--color-muted)]">{project.description ?? ""}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {project.technologies.slice(0, 3).map((tech) => (
                     <span key={tech} className="chip px-2 py-0.5 text-[10px]">

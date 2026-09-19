@@ -269,7 +269,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
                 <Link key={project.id} href={`/projects/${project.id}`} className="card card-hover p-4">
                   <p className="overline">{project.category}</p>
                   <h3 className="mt-1 text-base font-bold text-[var(--color-ink)]">{project.title}</h3>
-                  <p className="line-clamp-2 mt-1 text-xs leading-5 text-[var(--color-muted)]">{project.description}</p>
+                  <p className="line-clamp-2 mt-1 text-xs leading-5 text-[var(--color-muted)]">{project.description ?? ""}</p>
                   <p className="mt-2 text-[11px] text-[var(--color-faint)]">Updated {formatDate(project.updated_at)}</p>
                 </Link>
               ))}

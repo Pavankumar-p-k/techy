@@ -163,7 +163,7 @@ export function ProjectDetailClient({ projectId }: ProjectDetailClientProps) {
 
         <div className="p-5 sm:p-6">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="pill pill-accent">{project.category}</span>
+            <span className="pill pill-accent">{project.category ?? "Project"}</span>
             <span className={`pill ${PROJECT_STATUS_BADGES[project.status]}`}>{project.status}</span>
           </div>
 
@@ -191,7 +191,9 @@ export function ProjectDetailClient({ projectId }: ProjectDetailClientProps) {
             <span className="ml-auto text-xs text-[var(--color-faint)]">Created {formatDate(project.created_at)}</span>
           </div>
 
-          <p className="mt-4 whitespace-pre-line text-sm leading-7 text-[var(--color-muted)]">{project.description}</p>
+          {project.description ? (
+            <p className="mt-4 whitespace-pre-line text-sm leading-7 text-[var(--color-muted)]">{project.description}</p>
+          ) : null}
 
           {/* Live demo: TRY IT (embedded) / VISIT SITE (external) */}
           {project.demo_url ? (
