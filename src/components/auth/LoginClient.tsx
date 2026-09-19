@@ -16,25 +16,48 @@ export function LoginClient({ nextPath }: LoginClientProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
     setMessage(null);
+    setNeedsConfirmation(false);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       password,
     });
 
     if (error) {
       setMessage(error.message);
+      setNeedsConfirmation(/confirm|not verified/i.test(error.message));
     } else {
-      router.push(nextPath);
+      router.replace(nextPath);
     }
 
     setIsSubmitting(false);
+  }
+
+  async function resendConfirmation() {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setMessage("Enter your email address first.");
+      return;
+    }
+
+    setIsResending(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: normalizedEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/login?confirmed=1`,
+      },
+    });
+    setMessage(error ? error.message : "A new confirmation email has been sent. Check your inbox and spam folder.");
+    setIsResending(false);
   }
 
   return (
@@ -67,7 +90,10 @@ export function LoginClient({ nextPath }: LoginClientProps) {
               required
               autoComplete="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setNeedsConfirmation(false);
+              }}
               className="field"
             />
           </label>
@@ -84,7 +110,7 @@ export function LoginClient({ nextPath }: LoginClientProps) {
             />
           </label>
 
-          <button type="submit" disabled={isSubmitting} className="btn btn-primary btn-lg w-full">
+          <button type="submit" disabled={isSubmitting || isResending} className="btn btn-primary btn-lg w-full">
             {isSubmitting ? "Signing in..." : "Login"}
           </button>
         </form>
@@ -93,6 +119,17 @@ export function LoginClient({ nextPath }: LoginClientProps) {
           <p className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-danger-soft)] px-3 py-2 text-sm text-[var(--color-danger)]">
             {message}
           </p>
+        ) : null}
+
+        {needsConfirmation ? (
+          <button
+            type="button"
+            onClick={resendConfirmation}
+            disabled={isResending}
+            className="mt-3 w-full text-sm font-semibold text-[var(--color-ink)] underline underline-offset-4 disabled:opacity-60"
+          >
+            {isResending ? "Sending confirmation email..." : "Resend confirmation email"}
+          </button>
         ) : null}
 
         <p className="mt-5 text-sm text-[var(--color-muted)]">
