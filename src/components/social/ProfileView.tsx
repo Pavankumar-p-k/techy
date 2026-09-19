@@ -5,13 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PostCard } from "@/components/social/PostCard";
+import { UserLibraryClient } from "@/components/social/UserLibraryClient";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { useFollow, useFollowCounts } from "@/hooks/useFollow";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { PostWithAuthor, Project, SocialProfile } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 
-type ProfileTab = "posts" | "projects";
+type ProfileTab = "posts" | "projects" | "tools" | "resources";
 
 interface ProfileViewProps {
   profile: SocialProfile;
@@ -229,6 +230,12 @@ export function ProfileView({ profile }: ProfileViewProps) {
           <button type="button" data-active={activeTab === "projects"} onClick={() => setActiveTab("projects")}>
             Projects
           </button>
+          <button type="button" data-active={activeTab === "tools"} onClick={() => setActiveTab("tools")}>
+            Tools
+          </button>
+          <button type="button" data-active={activeTab === "resources"} onClick={() => setActiveTab("resources")}>
+            Resources
+          </button>
         </div>
 
         <div className="mt-4">
@@ -237,6 +244,8 @@ export function ProfileView({ profile }: ProfileViewProps) {
               <div className="skeleton h-4 w-3/4" />
               <div className="skeleton mt-2 h-4 w-1/2" />
             </div>
+          ) : activeTab === "tools" || activeTab === "resources" ? (
+            <UserLibraryClient profileId={profile.id} mode={activeTab} />
           ) : activeTab === "posts" ? (
             posts.length === 0 ? (
               <div className="card p-8 text-center text-sm text-[var(--color-muted)]">

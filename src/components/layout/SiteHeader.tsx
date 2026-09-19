@@ -22,6 +22,8 @@ const CREATE_OPTIONS = [
   { href: "/create/project", label: "Project", description: "Showcase your work", icon: "🚀" },
   { href: "/create/post?type=achievement", label: "Achievement", description: "Wins & certificates", icon: "🏆" },
   { href: "/create/post?type=course_completion", label: "Course Completed", description: "Learning progress", icon: "🎓" },
+  { href: "/submit", label: "Submit Tool", description: "Add a tool you love", icon: "🛠️" },
+  { href: "/submit/resource", label: "Submit Resource", description: "Share a learning resource", icon: "📚" },
 ];
 
 function NavIcon({ name, className }: { name: string; className: string }) {

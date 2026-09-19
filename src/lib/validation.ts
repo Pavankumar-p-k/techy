@@ -231,6 +231,14 @@ export const projectInputSchema = z.object({
   toolsUsed: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 tools.").optional(),
 });
 
+export const resourceSubmissionInputSchema = z.object({
+  name: z.string().trim().min(2, "Resource name is required.").max(120, "Name should be under 120 characters."),
+  url: z.string().trim().refine((v) => Boolean(parseHttpUrl(v)), "Resource must be a valid http(s) URL."),
+  category: z.string().trim().min(2, "Pick a category.").max(40),
+  shortDescription: z.string().trim().min(16, "Description should be at least 16 characters.").max(280, "Description is too long."),
+  freeDetails: z.string().trim().max(200, "Free details is too long.").optional().or(z.literal("")),
+});
+
 export const feedbackInputSchema = z.object({
   feedbackType: z.enum(["bug", "suggestion", "question", "improvement"]),
   content: z.string().trim().min(4, "Feedback should be at least 4 characters.").max(2000, "Feedback is too long."),
