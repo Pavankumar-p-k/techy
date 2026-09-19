@@ -230,33 +230,43 @@ export function ExploreClient() {
         aria-label="Search the community"
       />
 
-      {/* Tabs */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => switchTab(tab.key)}
-            className={`rounded-full border px-3.5 py-2 text-xs font-semibold transition sm:text-sm ${
-              activeTab === tab.key
-                ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
-                : "border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-            }`}
-          >
-            <tab.Icon aria-hidden="true" className="mr-1 h-4 w-4" />
-            {tab.label}
-            {!isSearchMode ? "" : ` (${tab.count})`}
-          </button>
-        ))}
+        {/* Sticky search + tabs block (Instagram search-style) */}
+        <div className="sticky top-14 z-30 -mx-4 bg-[var(--color-paper)] px-4 pb-2 pt-1 md:mx-0 md:rounded-b-2xl md:px-0">
+      <input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder={activeTab === "students" ? "Search by name, @username, branch, or skill..." : `Search ${activeTab}...`}
+        className="field"
+        aria-label="Search the community"
+      />
+      <div className="-mx-4 mt-4 overflow-x-auto px-4 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex w-max gap-2 md:w-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => switchTab(tab.key)}
+              className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition sm:text-sm ${
+                activeTab === tab.key
+                  ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]"
+                  : "border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+              }`}
+            >
+              <tab.Icon aria-hidden="true" className="mr-1 inline h-4 w-4" />
+              {tab.label}
+              {!isSearchMode ? "" : ` (${tab.count})`}
+            </button>
+          ))}
+        </div>
       </div>
+        </div>
 
-      {/* Category dropdown (browse mode) */}
-      {!isSearchMode && categories.length > 0 ? (
-        <div className="mt-4">
-          <CategoryDropdown
-            label={activeTab === "students" ? "Skill" : activeTab === "tools" ? "Category" : activeTab === "resources" ? "Type" : activeTab === "projects" ? "Field" : "Category"}
-            categories={categories}
-            value={category}
+      {/* Category dropdown (browse mode) */}            {!isSearchMode && categories.length > 0 ? (
+            <div className="mt-2 pb-1">
+              <CategoryDropdown
+                label={activeTab === "students" ? "Skill" : activeTab === "tools" ? "Category" : activeTab === "resources" ? "Type" : activeTab === "projects" ? "Field" : "Category"}
+                categories={categories}
+                value={category}
             onChange={setCategory}
           />
         </div>
