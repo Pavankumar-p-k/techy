@@ -222,7 +222,9 @@ export const projectInputSchema = z.object({
     .string()
     .trim()
     .refine((v) => v.length === 0 || Boolean(parseHttpUrl(v)), "Link must be a valid http(s) URL.")
-    .transform((v) => v || null),
+    .transform((v) => v || null)
+    .optional()
+    .nullable(),
   technologies: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 technologies."),
   toolsUsed: z.array(z.string().trim().min(1).max(30)).max(12, "Up to 12 tools."),
 });

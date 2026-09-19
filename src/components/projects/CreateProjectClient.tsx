@@ -54,6 +54,7 @@ export function CreateProjectClient() {
       coverUrl,
       demoUrl,
       githubUrl,
+      otherUrl: "",
       technologies: tagsToArray(technologiesInput),
       toolsUsed: tagsToArray(toolsInput),
     });
