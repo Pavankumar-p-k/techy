@@ -40,6 +40,7 @@ export function SettingsClient() {
 
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [pendingCropFile, setPendingCropFile] = useState<File | null>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -75,6 +76,35 @@ export function SettingsClient() {
       });
     }
   }, [profile]);
+
+  function cancelEdit() {
+    if (profile) {
+      setFullName(profile.full_name ?? "");
+      setUsername(profile.username ?? "");
+      setBio(profile.bio ?? "");
+      setBranch(profile.branch ?? "");
+      setYear(profile.year ?? "");
+      setCollege(profile.college ?? "");
+      setSkills(profile.skills ?? []);
+      setToolsUsed(profile.tools_used ?? []);
+      setInterests(profile.interests ?? []);
+      setCurrentlyBuilding(profile.currently_building ?? "");
+      setLookingFor(profile.looking_for ?? "");
+      setAvatarUrl(profile.avatar_url ?? "");
+      setLinks({
+        github: profile.link_github ?? "",
+        linkedin: profile.link_linkedin ?? "",
+        instagram: profile.link_instagram ?? "",
+        portfolio: profile.link_portfolio ?? "",
+        youtube: profile.link_youtube ?? "",
+        x: profile.link_x ?? "",
+        other: profile.link_other ?? "",
+      });
+    }
+    setMessage(null);
+    setIsSuccess(false);
+    setEditingProfile(false);
+  }
 
   function toggleArrayItem(list: string[], setList: (value: string[]) => void, value: string) {
     const trimmed = value.trim();
@@ -159,6 +189,8 @@ export function SettingsClient() {
       setMessage("Profile saved.");
       setIsSuccess(true);
       await refresh();
+      // Back to the clean summary view after saving (Instagram-style)
+      setEditingProfile(false);
     }
 
     setSaving(false);
@@ -323,7 +355,86 @@ export function SettingsClient() {
         <div className="mt-4">
           <PortfolioSettings username={profile?.username ?? ""} />
         </div>
-      ) : activeTab === "profile" ? (
+      ) : activeTab === "profile" && !editingProfile ? (
+        <div className="card mt-4 overflow-hidden">
+          <div className="flex items-center gap-4 p-5 pb-4">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="" className="h-16 w-16 rounded-full border border-[var(--color-line)] object-cover" />
+            ) : (
+              <span className="grid h-16 w-16 place-items-center rounded-full bg-[var(--color-ink)] text-xl font-black text-[var(--color-paper)]">
+                {getInitials(fullName || user.email || "U")}
+              </span>
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-lg font-black tracking-tight text-[var(--color-ink)]">{fullName || "Add your name"}</p>
+              <p className="truncate text-sm text-[var(--color-faint)]">@{username || "username"}</p>
+              {branch || year || college ? (
+                <p className="mt-0.5 truncate text-xs text-[var(--color-muted)]">{[branch, year, college].filter(Boolean).join(" • ")}</p>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditingProfile(true)}
+              className="btn btn-ghost btn-md ml-auto"
+            >
+              Edit
+            </button>
+          </div>
+
+          {bio ? <p className="px-5 pb-4 text-sm leading-6 text-[var(--color-muted)]">{bio}</p> : null}
+
+          {skills.length > 0 ? (
+            <div className="border-t border-[var(--color-line)] px-5 py-3">
+              <p className="overline">Skills</p>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {skills.map((skill) => (
+                  <span key={skill} className="chip bg-[var(--color-accent-soft)] text-[var(--color-ink)]">{skill}</span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {toolsUsed.length > 0 ? (
+            <div className="border-t border-[var(--color-line)] px-5 py-3">
+              <p className="overline">Tools</p>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {toolsUsed.map((tool) => (
+                  <span key={tool} className="chip">{tool}</span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {currentlyBuilding || lookingFor ? (
+            <div className="border-t border-[var(--color-line)] px-5 py-3">
+              {currentlyBuilding ? (
+                <p className="text-sm text-[var(--color-muted)]"><span className="font-semibold text-[var(--color-ink)]">Building: </span>{currentlyBuilding}</p>
+              ) : null}
+              {lookingFor ? (
+                <p className="mt-1 text-sm text-[var(--color-muted)]"><span className="font-semibold text-[var(--color-ink)]">Looking for: </span>{lookingFor}</p>
+              ) : null}
+            </div>
+          ) : null}
+
+          {Object.values(links).some(Boolean) ? (
+            <div className="flex flex-wrap gap-2 border-t border-[var(--color-line)] px-5 py-3">
+              {links.github ? <a href={links.github} target="_blank" rel="noopener noreferrer" className="chip hover:underline">GitHub ↗</a> : null}
+              {links.linkedin ? <a href={links.linkedin} target="_blank" rel="noopener noreferrer" className="chip hover:underline">LinkedIn ↗</a> : null}
+              {links.portfolio ? <a href={links.portfolio} target="_blank" rel="noopener noreferrer" className="chip hover:underline">Portfolio ↗</a> : null}
+              {links.instagram ? <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="chip hover:underline">Instagram ↗</a> : null}
+              {links.youtube ? <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="chip hover:underline">YouTube ↗</a> : null}
+              {links.x ? <a href={links.x} target="_blank" rel="noopener noreferrer" className="chip hover:underline">X ↗</a> : null}
+            </div>
+          ) : null}
+
+          {message ? (
+            <div className="border-t border-[var(--color-line)] px-5 py-3">
+              <p className={`text-sm ${isSuccess ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>{message}</p>
+            </div>
+            ) : null}
+        </div>
+      ) : activeTab === "profile" && editingProfile ? (
         <form onSubmit={handleSaveProfile} className="card mt-4 space-y-4 p-5">
           {/* Avatar */}
           <div className="flex items-center gap-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] p-3">
@@ -475,7 +586,10 @@ export function SettingsClient() {
 
           <div className="flex flex-wrap items-center gap-3 border-t border-[var(--color-line)] pt-4">
             <button type="submit" disabled={saving} className="btn btn-primary btn-lg">
-              {saving ? "Saving..." : "Save Profile"}
+              {saving ? "Saving..." : "Save"}
+            </button>
+            <button type="button" onClick={cancelEdit} className="btn btn-ghost btn-md">
+              Cancel
             </button>
             {message ? (
               <p className={`text-sm ${isSuccess ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>{message}</p>
