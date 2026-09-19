@@ -228,7 +228,7 @@ export function SiteHeader() {
                 <div
                   role="menu"
                   aria-label="Create options"
-                  className="absolute right-0 top-11 w-64 overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-1.5 shadow-[var(--shadow-strong)]"
+                  className="absolute right-0 top-11 w-48 overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-surface)] p-1 shadow-[var(--shadow-strong)]"
                 >
                   {CREATE_OPTIONS.map((option) => (
                     <Link
@@ -236,13 +236,10 @@ export function SiteHeader() {
                       href={option.href}
                       role="menuitem"
                       onClick={() => setIsCreateOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-[var(--color-surface-2)]"
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition hover:bg-[var(--color-surface-2)]"
                     >
-                      <option.Icon className="h-5 w-5" aria-hidden="true" />
-                      <span>
-                        <span className="block text-sm font-bold text-[var(--color-ink)]">{option.label}</span>
-                        <span className="block text-xs text-[var(--color-faint)]">{option.description}</span>
-                      </span>
+                      <option.Icon className="h-4 w-4 shrink-0 text-[var(--color-muted)]" aria-hidden="true" />
+                      <span className="text-sm font-semibold text-[var(--color-ink)]">{option.label}</span>
                     </Link>
                   ))}
                 </div>
