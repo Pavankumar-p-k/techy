@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImageCropper } from "@/components/settings/ImageCropper";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { POST_TYPE_LABELS } from "@/lib/social-utils";
 import { postInputSchema } from "@/lib/validation";
@@ -31,6 +33,55 @@ export function CreatePostClient() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [pendingCropFile, setPendingCropFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+
+  function handleImageSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setMessage("Please choose an image file.");
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setMessage("Image must be under 20MB.");
+      return;
+    }
+    setMessage(null);
+    setPendingCropFile(file);
+  }
+
+  async function handleCroppedImage(blob: Blob) {
+    if (!user) {
+      return;
+    }
+
+    setUploadingImage(true);
+    setPendingCropFile(null);
+
+    const filePath = `${user.id}/${Date.now()}.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from("community-media")
+      .upload(filePath, blob, {
+        cacheControl: "3600",
+        upsert: true,
+        contentType: "image/jpeg",
+      });
+
+    if (uploadError) {
+      setMessage("Image upload failed. Try again or paste an image link instead.");
+      setUploadingImage(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from("community-media").getPublicUrl(filePath);
+    setImageUrl(data.publicUrl);
+    setUploadingImage(false);
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -160,16 +211,62 @@ export function CreatePostClient() {
             />
           </label>
 
-          <label className="label">
-            Image URL (optional)
+          {/* Image attach — upload (with crop) or paste link */}
+          <div>
+            <p className="label">Image (optional)</p>
+            {imageUrl ? (
+              <div className="relative mt-1.5 overflow-hidden rounded-xl border border-[var(--color-line)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={imageUrl} alt="" className="max-h-64 w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl("")}
+                  aria-label="Remove image"
+                  className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/60 text-white transition hover:bg-black/80"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="mt-1.5 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--color-line)] py-6 text-sm font-semibold text-[var(--color-muted)] transition hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+              >
+                {uploadingImage ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <ImagePlus className="h-4 w-4" />
+                    Upload course screenshot, certificate, or photo
+                  </>
+                )}
+              </button>
+            )}
             <input
-              type="url"
-              value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
-              placeholder="https://... certificate/screenshot image"
-              className="field"
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelected}
+              className="hidden"
             />
-          </label>
+            <details className="mt-2">
+              <summary className="cursor-pointer text-[11px] font-semibold text-[var(--color-faint)] hover:text-[var(--color-ink)]">
+                or paste an image link
+              </summary>
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(event) => setImageUrl(event.target.value)}
+                placeholder="https://... image URL"
+                className="field mt-1.5"
+              />
+            </details>
+          </div>
 
           <label className="label">
             Tags (comma separated)
@@ -182,7 +279,7 @@ export function CreatePostClient() {
           </label>
 
           <div className="flex items-center gap-3 pt-1">
-            <button type="submit" disabled={submitting} className="btn btn-accent btn-lg">
+            <button type="submit" disabled={submitting || uploadingImage} className="btn btn-accent btn-lg">
               {submitting ? "Publishing..." : "Publish"}
             </button>
             {message ? (
@@ -191,6 +288,16 @@ export function CreatePostClient() {
           </div>
         </form>
       </div>
+
+      {/* Instagram-style crop modal for the attached image */}
+      {pendingCropFile ? (
+        <ImageCropper
+          file={pendingCropFile}
+          title="Crop post image"
+          onCancel={() => setPendingCropFile(null)}
+          onCropped={handleCroppedImage}
+        />
+      ) : null}
     </div>
   );
 }
