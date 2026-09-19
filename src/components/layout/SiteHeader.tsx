@@ -24,7 +24,7 @@ const CREATE_OPTIONS = [
   { href: "/create/post?type=achievement", label: "Achievement", description: "Wins & certificates", Icon: Award },
   { href: "/create/post?type=course_completion", label: "Course Completed", description: "Learning progress", Icon: GraduationCap },
   { href: "/submit", label: "Submit Tool", description: "Add a tool you love", Icon: Wrench },
-  { href: "/create/post?type=course_completion", label: "Submit Resource", description: "Share a learning resource", Icon: BookOpen },
+  { href: "/submit/resource", label: "Submit Resource", description: "Share a learning resource", Icon: BookOpen },
 ];
 
 function NavIcon({ name, className }: { name: string; className: string }) {
