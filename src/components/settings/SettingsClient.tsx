@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import { PortfolioSettings } from "@/components/settings/PortfolioSettings";
+import { ImageCropper } from "@/components/settings/ImageCropper";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { communityProfileSchema } from "@/lib/validation";
@@ -38,6 +39,7 @@ export function SettingsClient() {
   const [avatarUrl, setAvatarUrl] = useState("");
 
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [pendingCropFile, setPendingCropFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -162,7 +164,7 @@ export function SettingsClient() {
     setSaving(false);
   }
 
-  async function handleAvatarUpload(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleAvatarSelected(event: React.ChangeEvent<HTMLInputElement>) {
     if (!user) {
       return;
     }
@@ -177,20 +179,30 @@ export function SettingsClient() {
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      setMessage("Image must be under 2MB.");
+    if (file.size > 20 * 1024 * 1024) {
+      setMessage("Image must be under 20MB.");
+      return;
+    }
+
+    // Instagram-style: open the crop modal instead of uploading raw
+    setPendingCropFile(file);
+  }
+
+  async function handleCroppedAvatar(blob: Blob) {
+    if (!user) {
       return;
     }
 
     setUploadingAvatar(true);
     setMessage(null);
+    setPendingCropFile(null);
 
-    const extension = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const filePath = `${user.id}/${Date.now()}.${extension}`;
+    const filePath = `${user.id}/${Date.now()}.jpg`;
 
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, {
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, blob, {
       cacheControl: "3600",
       upsert: true,
+      contentType: "image/jpeg",
     });
 
     if (uploadError) {
@@ -328,7 +340,7 @@ export function SettingsClient() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={handleAvatarUpload}
+                onChange={handleAvatarSelected}
                 className="mt-1 block w-full text-xs text-[var(--color-muted)] file:mr-3 file:rounded-full file:border-0 file:bg-[var(--color-ink)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--color-paper)]"
               />
               {uploadingAvatar ? <p className="mt-1 text-xs text-[var(--color-faint)]">Uploading...</p> : null}
@@ -506,6 +518,16 @@ export function SettingsClient() {
           </div>
         </div>
       )}
+
+      {/* Instagram-style avatar crop modal */}
+      {pendingCropFile ? (
+        <ImageCropper
+          file={pendingCropFile}
+          title="Crop profile photo"
+          onCancel={() => setPendingCropFile(null)}
+          onCropped={handleCroppedAvatar}
+        />
+      ) : null}
     </div>
   );
 }
