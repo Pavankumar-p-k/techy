@@ -139,24 +139,24 @@ export function ProfileView({ profile }: ProfileViewProps) {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats — clickable, Instagram-style */}
         <div className="mt-5 grid grid-cols-4 gap-2 border-t border-[var(--color-line)] pt-4 text-center">
-          <div>
-            <p className="text-lg font-black text-[var(--color-ink)]">{postCount}</p>
+          <Link href={`/u/${profile.username}/posts`} className="group">
+            <p className="text-lg font-black text-[var(--color-ink)] group-hover:underline">{postCount}</p>
             <p className="overline">Posts</p>
-          </div>
-          <div>
-            <p className="text-lg font-black text-[var(--color-ink)]">{projectCount}</p>
+          </Link>
+          <Link href={`/u/${profile.username}/projects`} className="group">
+            <p className="text-lg font-black text-[var(--color-ink)] group-hover:underline">{projectCount}</p>
             <p className="overline">Projects</p>
-          </div>
-          <button type="button" className="group" onClick={() => alert("Followers list coming soon")}>
+          </Link>
+          <Link href={`/u/${profile.username}/followers`} className="group">
             <p className="text-lg font-black text-[var(--color-ink)] group-hover:underline">{followers}</p>
             <p className="overline">Followers</p>
-          </button>
-          <div>
-            <p className="text-lg font-black text-[var(--color-ink)]">{following}</p>
+          </Link>
+          <Link href={`/u/${profile.username}/following`} className="group">
+            <p className="text-lg font-black text-[var(--color-ink)] group-hover:underline">{following}</p>
             <p className="overline">Following</p>
-          </div>
+          </Link>
         </div>
       </section>
 
